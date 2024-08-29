@@ -1,8 +1,18 @@
 date: "27/08/2024"
-start_time: "17:00"
+start_time: "10:00"
 end_time: "21:00"
 padding_minutes: 15
 duration: 25
-message_interval: 1
-subsystem_preference: 1
 at_once: 6
+
+subsystem_preference: 1
+target_subsystem: "Artificial Intelligence"
+
+message_interval: 10
+
+columns:
+  name: "Full Name"
+  whatsapp_number: "WhatsApp Number"
+  preference1: "First Preference of Subsystem"
+  preference2: "Second Preference of Subsystem"
+  first_year: "This form is only for First Year Students. Are you in First Year?"
