@@ -1,0 +1,3 @@
+alright==2.61
+pandas==2.2.2
+PyYAML==6.0.2

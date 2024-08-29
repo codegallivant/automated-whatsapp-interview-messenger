@@ -1,0 +1,8 @@
+date: "27/08/2024"
+start_time: "17:00"
+end_time: "21:00"
+padding_minutes: 15
+duration: 25
+message_interval: 1
+subsystem_preference: 1
+at_once: 6
