@@ -2,7 +2,10 @@
 Automatic whatsapp messenger & scheduler for interviews at project MANAS
 
 ## Dependencies
-1. ``pip install -r requirements.txt``
+1. Install pip modules - 
+```bash
+pip install -r requirements.txt
+```
 2. Install a stable chrome and chrome driver version from [Chrome for Testing](https://googlechromelabs.github.io/chrome-for-testing/). (I used version 128). This is required as automated scripts can only work with chrome browsers in testing.
 3. Modify the python ``alright`` package as follows - 
     \
@@ -27,6 +30,7 @@ Hello ${name}. Greetings from Project MANAS. Your interview for ${subsystem} is 
 
 ## Run
 1. Add interviewee details in a file called ``details.csv`` in the same directory
-2. ```bash
+2. Run the file - 
+```bash
 python3 main.py
 ```
