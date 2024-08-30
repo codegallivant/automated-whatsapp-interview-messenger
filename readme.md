@@ -7,7 +7,7 @@ When building from source, install dependencies as follows -
     ```bash
     pip install -r requirements.txt
     ```
-2. Install a stable chrome and chrome driver version from [Chrome for Testing](https://googlechromelabs.github.io/chrome-for-testing/). (I used version 128). This is required as automated scripts can only work with chrome browsers in testing.
+2. Install a stable chrome and chrome driver version from [Chrome for Testing](https://googlechromelabs.github.io/chrome-for-testing/). (I used version 128). This is required as automated scripts can only work with chrome browsers for testing.
 3. Modify the python `alright` package as follows - 
     \
     In `site-packages/alright/__init__.py`, replace the following block of code under ``if not browser:``:
