@@ -5,6 +5,9 @@ import datetime
 import time
 from alright import WhatsApp
 import sys
+import multiprocessing
+import time
+import csv
 
 
 def permission_to_continue():
@@ -44,10 +47,11 @@ details = pd.read_csv("details.csv")
 
 print("First 5 rows of 'details.csv':")
 print(details.head())
+
 permission_to_continue()
 
 
-def parse_template_message():
+def parse_template_message(template_message):
     index_pairs = list()
     start_index = None
     end_index = None
@@ -64,11 +68,12 @@ def parse_template_message():
             index_pairs.append((start_index, end_index))
     return index_pairs
 
+
 with open("message.txt") as f:
     template_message = f.read()
     print("Contents of 'message.txt':")
     print(template_message)
-index_pairs = parse_template_message()
+index_pairs = parse_template_message(template_message)
 
 
 def synthesise_message(name, subsystem, date, interview_time):
@@ -93,10 +98,50 @@ def synthesise_message(name, subsystem, date, interview_time):
     # print(message)
     return message
 
+
 print("Example message:")
 print(synthesise_message("Abc Dfg", "Artificial Intelligence", "27/08/2024", "19:00"))
 
 permission_to_continue()
+
+def add_column_value(file_path, new_column, value, row_index):
+    with open(file_path, 'r', newline='') as file:
+        reader = csv.reader(file)
+        rows = list(reader)    
+    headers = rows[0]
+    if new_column not in headers:
+        headers.append(new_column)
+        for row in rows[1:]:
+            row.append('')
+    column_index = headers.index(new_column)
+    if 0 <= row_index < len(rows):
+        rows[row_index][column_index] = value
+    else:
+        print(f"Row index {row_index} is out of range.")
+        return
+    with open(file_path, 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerows(rows)    
+    # print(f"Added value '{value}' to column '{new_column}' at row {row_index}")
+
+
+def run_with_timeout(func, args=(), kwargs={}, timeout=5):
+    def wrapper(result_queue):
+        result = func(*args, **kwargs)
+        result_queue.put(result)
+
+    result_queue = multiprocessing.Queue()
+    process = multiprocessing.Process(target=wrapper, args=(result_queue,))
+    
+    process.start()
+    process.join(timeout)
+    
+    if process.is_alive():
+        process.terminate()
+        return None, False
+    
+    return result_queue.get(), True
+
 
 messenger = WhatsApp()
 def send_message(name, phone_number, message):
@@ -104,11 +149,19 @@ def send_message(name, phone_number, message):
     if len(phone_number)==10:
         phone_number = "+91" + phone_number
     i = 0
+    timeout_tries = 0
     while True:
         try:
             # pywhatkit.sendwhatmsg_instantly(str(phone_number), message, wait_time=20, tab_close=True)
-            messenger.send_direct_message(str(phone_number), message, False)
-            break
+            # messenger.send_direct_message(str(phone_number), message, False)
+            result, status = run_with_timeout(messenger.send_direct_message, args=(str(phone_number),message,False), timeout=PARAMS["timeout"])
+            if status == False:
+                timeout_tries += 1
+                print(f"Attempt {timeout_tries}: Message timed out")
+                if timeout_tries == PARAMS["max_timeout_tries"]:
+                    return False
+            else:
+                return True
         except Exception as e:
             i+=1
             print(f"Failed to send message. Retrying...{i}")
@@ -150,9 +203,13 @@ def calculate_time(i, start_time, end_time, duration, padding_minutes):
     return interview_time
 
 
-def validate_row(first_year, subsystem):
-    return (first_year == "Yes") and (subsystem == PARAMS["target_subsystem"] or PARAMS["target_subsystem"] in [None, ""])
+def validate_row(first_year, subsystem, notified):
+    return (first_year == "Yes") and (subsystem == PARAMS["target_subsystem"] or PARAMS["target_subsystem"] in [None, ""]) and (notified not in ["Yes", "Message timed out"])
 
+
+add_column_value("details.csv", "Notified", "", 1)
+if "Notified" not in details.keys():
+    details["Notified"] = ['']*len(details)
 
 # Send all messages
 i = 0
@@ -164,20 +221,31 @@ for index, row in details.iterrows():
     preference_columns = [PARAMS["columns"]["preference1"], PARAMS["columns"]["preference2"]]
     subsystem = row[preference_columns[PARAMS["subsystem_preference"]-1]]
     first_year = row[PARAMS["columns"]["first_year"]]
+    notified = row["Notified"]
 
-    if not validate_row(first_year, subsystem):
-        print("Skipping..")
+    if not validate_row(first_year, subsystem, notified):
+        print(f"Skipping row {index+1}..")
         continue
     
     if i%PARAMS["at_once"] == 0:
        interview_time = calculate_time(batch_count, PARAMS["start_time"], PARAMS["end_time"], PARAMS["duration"], PARAMS["padding_minutes"])
        batch_count += 1
+
     if interview_time == False:
         print("End time reached.")
         print(f"{i} interviews scheduled.")
         break
+    
+    print(f"Attempting to schedule: Interview {i}(Row {index+1}) @ {interview_time} for {subsystem} [{name}({phone_number})]")
     message = synthesise_message(name, subsystem, PARAMS["date"], interview_time)
-    send_message(name, phone_number, message)
-    print(f"{index}: Interview", "for", subsystem,"scheduled at", interview_time+".", f"Message sent to {name}(Whatsapp number: {str(phone_number)}).")
-    i+=1
+    message_status = send_message(name, phone_number, message)
+    if message_status == True:
+        i+=1
+        print(f"Scheduled.")
+        add_column_value("details.csv", "Notified", "Yes", index+1)
+    else:
+        print(f"Sending the message timed out. The whatsapp number may be invalid.")
+        add_column_value("details.csv", "Notified", "Message timed out", index+1)
+    
     time.sleep(PARAMS["message_interval"])
+    print()

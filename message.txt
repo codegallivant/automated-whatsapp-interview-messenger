@@ -1,1 +1,4 @@
-Hello ${name}. Greetings from Project MANAS. Your interview for ${subsystem} is scheduled for ${date} at ${interview_time}.
+Hello ${name}, this message is a confirmation of your Project Manas ${subsystem} interview. 
+Your interview has been scheduled on ${date} at ${interview_time}. You are requested to come to the workshop 10 minutes prior to the given time slot. 
+Our workshop location is: https://g.page/project-manas-manipal?share 
+Reply to confirm.

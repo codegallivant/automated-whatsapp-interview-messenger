@@ -25,25 +25,29 @@ When building from source, install dependencies as follows -
     ```
 
 ## Set template message
-Modify/create a file called `message.txt` in the same directory as the script and set the contents. Use ``${variable_name}`` for variables like `name` or `interview_time` etc. For example:
+Modify/create a file called `message.txt` in the same directory as the script and set the contents. Use the format ``${variable_name}`` to insert variables like ``name`` or ``interview_time`` etc. For example:
 ```
 Hello ${name}. Greetings from Project MANAS. Your interview for ${subsystem} is scheduled for ${date} at ${interview_time}.
 ```
+Variables you can use in the message are ``interview_time``, ``name``, ``date``, ``subsystem``.
 
 ## Set parameters
-In ``parameters.yaml``, you can customize parameters like so - 
+In `parameters.yaml`, you can customize parameters like so - 
 ```yaml
-date: "27/08/2024" # Set the date of interviews to be scheduled
-start_time: "10:00" # Set the time the first interview should start at
-end_time: "21:00" # Set the maximum time at which the last interview should end by
-padding_minutes: 15 # Set the time to wait between each interview
-duration: 25 # Set the duration of each interview
-at_once: 6 # Set the number of interviews to schedule at the same time 
+date: "27/08/2024" # Date of interviews to be scheduled. Can be in any format
+start_time: "10:00" # Time(same format, 24hr) the first interview should start at
+end_time: "21:00" # Maximum time(same format, 24hr) at which the last interview should end by
+padding_minutes: 15 # Number of minutes to wait between each interview
+duration: 25 # Duration in minutes of each interview
+at_once: 6 # Number of interviews to schedule for the same time 
 
-subsystem_preference: 1 # Set subsystem preference number to be chosen for the interview.
-target_subsystem: "Artificial Intelligence" # Set the subsystem to schedule interviews for. Set empty string("") or null for no restrictions.
+subsystem_preference: 1 # Subsystem preference number to be chosen for the interview.
+target_subsystem: "Artificial Intelligence" # Subsystem to schedule interviews for. Set empty string("") or null for no restrictions.
 
-message_interval: 10 # Set the number of seconds to wait between sending consecutive whatsapp messages
+message_interval: 10 # Number of seconds to wait between sending consecutive whatsapp messages
+
+timeout: 20 # Timeout for sending message (required to handle invalid phone numbers)
+max_timeout_tries: 3 # Maximum number of tries to try sending timing out messages
 
 columns: # Enter names of columns in the CSV file
   name: "Full Name"
@@ -54,7 +58,7 @@ columns: # Enter names of columns in the CSV file
 ```
 
 ## Run
-1. Add interviewee details in a file called ``details.csv`` in the same directory
+1. Add interviewee details in a file called `details.csv` in the same directory
 2. Run the file - 
     ```bash
     python3 main.py
