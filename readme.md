@@ -47,7 +47,7 @@ duration: 25 # Duration in minutes of each interview
 at_once: 6 # Number of interviews to schedule for the same time 
 
 subsystem_preference: 1 # Subsystem preference number to be chosen for the interview.
-target_subsystem: "Artificial Intelligence" # Subsystem to schedule interviews for. Set empty string("") or null for no restrictions.
+target_subsystem: "Artificial Intelligence" # Subsystem to schedule interviews for. Set empty string("") or null for no restrictions. This must be the same string as in the sheet
 
 message_interval: 10 # Number of seconds to wait between sending consecutive whatsapp messages
 
@@ -56,7 +56,7 @@ max_timeout_tries: 3 # Maximum number of tries to try sending timing out message
 
 notifier: "Janak" # Only rows with MemberNotify column equal to this value will be considered (to split sending messages among people)
 
-columns: # Enter names of columns in the CSV file
+columns: # Enter names of columns in the sheet
   name: "Full Name"
   whatsapp_number: "WhatsApp Number"
   preference1: "First Preference of Subsystem"
