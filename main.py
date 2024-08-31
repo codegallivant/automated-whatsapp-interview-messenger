@@ -207,9 +207,9 @@ def validate_row(first_year, subsystem, notified):
     return (first_year == "Yes") and (subsystem == PARAMS["target_subsystem"] or PARAMS["target_subsystem"] in [None, ""]) and (notified not in ["Yes", "Message timed out"])
 
 
-add_column_value("details.csv", "Notified"+PARAMS["target_subsystem"], "", 1)
-if "Notified"+PARAMS["target_subsystem"] not in details.keys():
-    details["Notified"+PARAMS["target_subsystem"]] = ['']*len(details)
+add_column_value("details.csv", "Notified_"+PARAMS["target_subsystem"], "", 1)
+if "Notified_"+PARAMS["target_subsystem"] not in details.keys():
+    details["Notified_"+PARAMS["target_subsystem"]] = ['']*len(details)
 
 # Send all messages
 i = 0
@@ -221,7 +221,7 @@ for index, row in details.iterrows():
     preference_columns = [PARAMS["columns"]["preference1"], PARAMS["columns"]["preference2"]]
     subsystem = row[preference_columns[PARAMS["subsystem_preference"]-1]]
     first_year = row[PARAMS["columns"]["first_year"]]
-    notified = row["Notified"+PARAMS["target_subsystem"]]
+    notified = row["Notified_"+PARAMS["target_subsystem"]]
 
     if not validate_row(first_year, subsystem, notified):
         print(f"Skipping row {index+1}..")
@@ -242,10 +242,13 @@ for index, row in details.iterrows():
     if message_status == True:
         i+=1
         print(f"Scheduled.")
-        add_column_value("details.csv", "Notified"+PARAMS["target_subsystem"], "Yes", index+1)
+        add_column_value("details.csv", "Notified_"+PARAMS["target_subsystem"], "Yes", index+1)
     else:
         print(f"Sending the message timed out. The whatsapp number may be invalid.")
-        add_column_value("details.csv", "Notified"+PARAMS["target_subsystem"], "Message timed out", index+1)
+        add_column_value("details.csv", "Notified_"+PARAMS["target_subsystem"], "Message timed out", index+1)
     
-    time.sleep(PARAMS["message_interval"])
+    message_interval = PARAMS["message_interval"]
+    if i <= 1 and message_interval < 15:
+        message_interval += 10
+    time.sleep(message_interval)
     print()
