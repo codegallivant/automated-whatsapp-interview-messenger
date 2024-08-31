@@ -23,8 +23,8 @@ When building from source, install dependencies as follows -
         self.chrome_options.executable_path="path/to/chromedriver"
         browser = webdriver.Chrome(options=self.chrome_options)
         ```
-    2. Make chrome browser headless
-        Only do this after signing into WhatsApp in the browser once. This only works in linux for now. I haven't added the new line under win32 (windows) as I havent tested it on windows yet yet.
+    2. Make chrome browser headless \
+        Only do this after signing into WhatsApp in the browser once. This only works in linux for now. I haven't added the new line under win32 (windows) as I havent tested it on windows yet. \
         In `site-packages/alright/__init__.py`, replace the following block of code:
         ```python
         @property
