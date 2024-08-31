@@ -23,6 +23,8 @@ When building from source, install dependencies as follows -
     self.chrome_options.executable_path="path/to/chromedriver"
     browser = webdriver.Chrome(options=self.chrome_options)
     ```
+## Download service account credentials file
+Set the service account credentials in ``sac_creds/credentials.json``. This is used to authenticate with the service account used to pull details from the google sheet and add notification status.
 
 ## Set template message
 Modify/create a file called `message.txt` in the same directory as the script and set the contents. Use the format ``${variable_name}`` to insert variables like ``name`` or ``interview_time`` etc. For example:
@@ -34,6 +36,9 @@ Variables you can use in the message are ``interview_time``, ``name``, ``date``,
 ## Set parameters
 In `parameters.yaml`, you can customize parameters like so - 
 ```yaml
+sheet_url: "https://docs.google.com/spreadsheets/d/1KY-J7UM8wH15H9mF1tiQpJvrKMsNQJBGXVFBpVjSWjY" # Link to sheet
+sheet_name: "Form Responses 1" # Sheet name
+
 date: "27/08/2024" # Date of interviews to be scheduled. Can be in any format
 start_time: "10:00" # Time(same format, 24hr) the first interview should start at
 end_time: "21:00" # Maximum time(same format, 24hr) at which the last interview should end by
@@ -48,6 +53,8 @@ message_interval: 10 # Number of seconds to wait between sending consecutive wha
 
 timeout: 20 # Timeout for sending message (required to handle invalid phone numbers)
 max_timeout_tries: 3 # Maximum number of tries to try sending timing out messages
+
+notifier: "Janak"
 
 columns: # Enter names of columns in the CSV file
   name: "Full Name"

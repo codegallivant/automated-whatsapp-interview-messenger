@@ -8,6 +8,56 @@ import sys
 import multiprocessing
 import time
 import csv
+import gspread
+import pandas as pd
+from oauth2client.service_account import ServiceAccountCredentials
+
+
+def get_filtered_sheet(sheet_url, worksheet_name, filter_column, filter_value):
+    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+    creds = ServiceAccountCredentials.from_json_keyfile_name('sac_creds/credentials.json', scope)
+    client = gspread.authorize(creds)
+
+    sheet = client.open_by_url(sheet_url).worksheet(worksheet_name)
+
+    data = sheet.get_all_values()
+
+    df = pd.DataFrame(data[1:], columns=data[0])
+
+    filtered_df = df[df[filter_column] == filter_value]
+    filtered_df = filtered_df[filtered_df["Notified_"+PARAMS["target_subsystem"]]!="Yes"]
+    filtered_df = filtered_df[filtered_df["Notified_"+PARAMS["target_subsystem"]]!="Message timed out"]
+
+    filtered_df['id'] = filtered_df.index + 2
+
+    return filtered_df
+
+
+def update_sheet_values(sheet_url, worksheet_name, update_column, row_indexes, update_values):
+    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+    creds = ServiceAccountCredentials.from_json_keyfile_name('sac_creds/credentials.json', scope)
+    client = gspread.authorize(creds)
+
+    sheet = client.open_by_url(sheet_url).worksheet(worksheet_name)
+
+    headers = sheet.row_values(1)
+    if update_column not in headers:
+        new_col_index = len(headers) + 1
+        sheet.update_cell(1, new_col_index, update_column)
+        update_col_index = new_col_index
+        print(f"Added new column '{update_column}' at position {new_col_index}")
+    else:
+        update_col_index = headers.index(update_column) + 1
+
+    updates = []
+    for row_index, value in zip(row_indexes, update_values):
+        updates.append({
+            'range': f'{gspread.utils.rowcol_to_a1(row_index, update_col_index)}',
+            'values': [[value]]
+        })
+
+    sheet.batch_update(updates)
+    print(f"Updated {len(updates)} cells in column '{update_column}'")
 
 
 def permission_to_continue():
@@ -43,7 +93,12 @@ with open("parameters.yaml") as stream:
 
 permission_to_continue()
 
-details = pd.read_csv("details.csv")
+
+sheet_url = PARAMS["sheet_url"]
+worksheet_name = PARAMS["sheet_name"]
+
+details = get_filtered_sheet(sheet_url, worksheet_name, 'MemberNotifier', 'Janak')
+
 
 print("First 5 rows of 'details.csv':")
 print(details.head())
@@ -214,6 +269,8 @@ if "Notified_"+PARAMS["target_subsystem"] not in details.keys():
 # Send all messages
 i = 0
 batch_count = 0
+selected_indexes = list()
+selected_indexes_values = list()
 for index, row in details.iterrows():
     # print(row)
     name = row[PARAMS['columns']['name']]
@@ -239,16 +296,22 @@ for index, row in details.iterrows():
     print(f"Attempting to schedule: Interview {i}(Row {index+1}) @ {interview_time} for {subsystem} [{name}({phone_number})]")
     message = synthesise_message(name, subsystem, PARAMS["date"], interview_time)
     message_status = send_message(name, phone_number, message)
+    selected_indexes.append(row["id"])
     if message_status == True:
         i+=1
         print(f"Scheduled.")
-        add_column_value("details.csv", "Notified_"+PARAMS["target_subsystem"], "Yes", index+1)
+        selected_indexes_values.append("Yes")
+        # add_column_value("details.csv", "Notified_"+PARAMS["target_subsystem"], "Yes", index+1)
     else:
         print(f"Sending the message timed out. The whatsapp number may be invalid.")
-        add_column_value("details.csv", "Notified_"+PARAMS["target_subsystem"], "Message timed out", index+1)
+        selected_indexes_values.append("Message timed out")
+        # add_column_value("details.csv", "Notified_"+PARAMS["target_subsystem"], "Message timed out", index+1)
     
     message_interval = PARAMS["message_interval"]
     if i <= 1 and message_interval < 15:
         message_interval += 10
     time.sleep(message_interval)
     print()
+
+
+update_sheet_values(sheet_url, worksheet_name, "Notified_"+PARAMS["target_subsystem"], selected_indexes, selected_indexes_values)
