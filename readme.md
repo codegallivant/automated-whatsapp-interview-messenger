@@ -9,20 +9,49 @@ When building from source, install dependencies as follows -
     ```
 2. Install a stable chrome and chrome driver version from [Chrome for Testing](https://googlechromelabs.github.io/chrome-for-testing/). (I used version 128). This is required as automated scripts can only work with chrome browsers for testing.
 3. Modify the python `alright` package as follows - 
-    \
-    In `site-packages/alright/__init__.py`, replace the following block of code under ``if not browser:``:
-    ```python    
-    browser = webdriver.Chrome(
-    ChromeDriverManager().install(),
-    options=self.chrome_options,
-    )
-    ```
-    with the following:
-    ```python
-    self.chrome_options.binary_location = "path/to/chrome"
-    self.chrome_options.executable_path="path/to/chromedriver"
-    browser = webdriver.Chrome(options=self.chrome_options)
-    ```
+   1. Set path to chrome and chrome driver manually - 
+        In `site-packages/alright/__init__.py`, replace the following block of code under ``if not browser:``:
+        ```python    
+        browser = webdriver.Chrome(
+        ChromeDriverManager().install(),
+        options=self.chrome_options,
+        )
+        ```
+        with the following:
+        ```python
+        self.chrome_options.binary_location = "path/to/chrome"
+        self.chrome_options.executable_path="path/to/chromedriver"
+        browser = webdriver.Chrome(options=self.chrome_options)
+        ```
+    2. Make chrome browser headless (Only do this after signing into WhatsApp in the browser once) (Only works in linux for now. Haven't added it under win32 (windows) as I havent tested that) -
+        In `site-packages/alright/__init__.py`, replace the following block of code:
+        ```python
+        @property
+        def chrome_options(self):
+            chrome_options = Options()
+            if sys.platform == "win32":
+                chrome_options.add_argument("--profile-directory=Default")
+                chrome_options.add_argument("--user-data-dir=C:/Temp/ChromeProfile")
+            else:
+                chrome_options.add_argument("start-maximized")
+                chrome_options.add_argument("--user-data-dir=./User_Data")
+        return chrome_options
+        ```
+        with the following:
+        ```python
+        @property
+        def chrome_options(self):
+            chrome_options = Options()
+            if sys.platform == "win32":
+                chrome_options.add_argument("--profile-directory=Default")
+                chrome_options.add_argument("--user-data-dir=C:/Temp/ChromeProfile")
+            else:
+                chrome_options.add_argument("--headless=new") # New line
+                chrome_options.add_argument("start-maximized")
+                chrome_options.add_argument("--user-data-dir=./User_Data")
+        return chrome_options
+        ```
+
 ## Download service account credentials file
 Set the service account credentials in ``sac_creds/credentials.json``. This is used to authenticate with the service account used to pull details from the google sheet and add notification status.
 
