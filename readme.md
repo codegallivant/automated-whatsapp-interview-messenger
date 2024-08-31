@@ -65,8 +65,7 @@ columns: # Enter names of columns in the CSV file
 ```
 
 ## Run
-1. Add interviewee details in a file called `details.csv` in the same directory
-2. Run the file - 
+1. Run the file - 
     ```bash
     python3 main.py
     ```
