@@ -36,7 +36,7 @@ Variables you can use in the message are ``interview_time``, ``name``, ``date``,
 ## Set parameters
 In `parameters.yaml`, you can customize parameters like so - 
 ```yaml
-sheet_url: "<Insert sheet link here>" # Link to sheet
+sheet_url: "<Insert sheet link here>" # Link to sheet (discard everything after the id i.e. from '/edit')
 sheet_name: "Form Responses 1" # Sheet name
 
 date: "27/08/2024" # Date of interviews to be scheduled. Can be in any format

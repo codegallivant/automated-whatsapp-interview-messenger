@@ -25,8 +25,9 @@ def get_filtered_sheet(sheet_url, worksheet_name, filter_column, filter_value):
     df = pd.DataFrame(data[1:], columns=data[0])
 
     filtered_df = df[df[filter_column] == filter_value]
-    filtered_df = filtered_df[filtered_df["Notified_"+PARAMS["target_subsystem"]]!="Yes"]
-    filtered_df = filtered_df[filtered_df["Notified_"+PARAMS["target_subsystem"]]!="Message timed out"]
+    if "Notified_"+PARAMS["target_subsystem"] in filtered_df.keys():
+        filtered_df = filtered_df[filtered_df["Notified_"+PARAMS["target_subsystem"]]!="Yes"]
+        filtered_df = filtered_df[filtered_df["Notified_"+PARAMS["target_subsystem"]]!="Message timed out"]
 
     filtered_df['id'] = filtered_df.index + 2
 
@@ -262,7 +263,7 @@ def validate_row(first_year, subsystem, notified):
     return (first_year == "Yes") and (subsystem == PARAMS["target_subsystem"] or PARAMS["target_subsystem"] in [None, ""]) and (notified not in ["Yes", "Message timed out"])
 
 
-add_column_value("details.csv", "Notified_"+PARAMS["target_subsystem"], "", 1)
+# add_column_value("details.csv", "Notified_"+PARAMS["target_subsystem"], "", 1)
 if "Notified_"+PARAMS["target_subsystem"] not in details.keys():
     details["Notified_"+PARAMS["target_subsystem"]] = ['']*len(details)
 
