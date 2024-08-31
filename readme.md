@@ -96,7 +96,7 @@ columns: # Enter names of columns in the sheet
 ```
 
 ## Run
-1. Build from source or use an executable directly 
+1. Install the dependencies (if not using an executable)
 2. Download the service account credentials file into `sac_creds/credentials.json`
 3. Set template message in `message.txt`
 4. Set parameters in `parameters.yaml`
