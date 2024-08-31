@@ -24,7 +24,7 @@ When building from source, install dependencies as follows -
         browser = webdriver.Chrome(options=self.chrome_options)
         ```
     2. Make chrome browser headless
-        Only do this after signing into WhatsApp in the browser once. This only works in linux for now. I haven't added the new line under win32 (windows) as I havent tested that yet -
+        Only do this after signing into WhatsApp in the browser once. This only works in linux for now. I haven't added the new line under win32 (windows) as I havent tested it on windows yet yet.
         In `site-packages/alright/__init__.py`, replace the following block of code:
         ```python
         @property
@@ -96,7 +96,11 @@ columns: # Enter names of columns in the sheet
 ```
 
 ## Run
-1. Run the file - 
+1. Build from source or use an executable directly 
+2. Download the service account credentials file into `sac_creds/credentials.json`
+3. Set template message in `message.txt`
+4. Set parameters in `parameters.yaml`
+5. Run the file (if not using an executable)- 
     ```bash
     python3 main.py
     ```
