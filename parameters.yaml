@@ -8,9 +8,9 @@ at_once: 6
 subsystem_preference: 1
 target_subsystem: "Artificial Intelligence"
 
-message_interval: 10
+message_interval: 20
 
-timeout: 20
+timeout: 30
 max_timeout_tries: 3
 
 columns:
