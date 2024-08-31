@@ -101,7 +101,7 @@ worksheet_name = PARAMS["sheet_name"]
 details = get_filtered_sheet(sheet_url, worksheet_name, 'MemberNotifier', 'Janak')
 
 
-print("First 5 rows of 'details.csv':")
+print("First 5 rows of sheet:")
 print(details.head())
 
 permission_to_continue()
