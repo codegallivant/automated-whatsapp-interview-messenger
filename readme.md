@@ -54,7 +54,7 @@ message_interval: 10 # Number of seconds to wait between sending consecutive wha
 timeout: 20 # Timeout for sending message (required to handle invalid phone numbers)
 max_timeout_tries: 3 # Maximum number of tries to try sending timing out messages
 
-notifier: "Janak"
+notifier: "Janak" # Only rows with MemberNotify column equal to this value will be considered (to split sending messages among people)
 
 columns: # Enter names of columns in the CSV file
   name: "Full Name"
@@ -62,6 +62,7 @@ columns: # Enter names of columns in the CSV file
   preference1: "First Preference of Subsystem"
   preference2: "Second Preference of Subsystem"
   first_year: "This form is only for First Year Students. Are you in First Year?"
+  notifier: "MemberNotifier"
 ```
 
 ## Run

@@ -1,7 +1,20 @@
+# Old files
 real_responses/
-User_Data/
 details.csv
 details2.csv
+
+# Service Account Credentials
 sac_creds/
+
+# Parameters
 parameters.yaml
+
+# Program to sync copy of responses with original
 sync_sheets.py
+
+# Executable
+build/
+dist/
+main.spec
+
+User_Data/
