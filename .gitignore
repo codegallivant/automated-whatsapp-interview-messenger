@@ -5,7 +5,7 @@ details2.csv
 backupinit.py
 
 # Service Account Credentials
-sac_creds/
+credentials.json
 
 # Executable
 build/

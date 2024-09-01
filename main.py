@@ -75,7 +75,7 @@ def chrome_options():
 
 def authenticate_sheet(sheet_url, worksheet_name):
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-    creds = ServiceAccountCredentials.from_json_keyfile_name('sac_creds/credentials.json', scope)
+    creds = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scope)
     client = gspread.authorize(creds)
 
     sheet = client.open_by_url(sheet_url).worksheet(worksheet_name)
