@@ -22,7 +22,7 @@ interview_time_settings:
 
 subsystem_settings:
   subsystem_preference: 1
-  target_subsystem: "Management"
+  target_subsystem: "Artificial Intelligence"
 
 message_settings:
   message_interval: 10
@@ -32,12 +32,14 @@ message_settings:
 
 columns:
   name: "Full Name"
+  branch: "Branch"
   whatsapp_number: "WhatsApp Number"
   mobile_number: "Mobile Number"
+  email_id: "Email Address"
+  learner_id: "Learner ID (@learner.manipal.edu)"
   preference1: "First Preference of Subsystem"
   preference2: "Second Preference of Subsystem"
-  branch: "Branch"
-  email: "Learner ID (@learner.manipal.edu)"
+  description: "Tell us about yourself."
   first_year: "This form is only for First Year Students. Are you in First Year?"
   notifier: "MemberNotifier"
 
