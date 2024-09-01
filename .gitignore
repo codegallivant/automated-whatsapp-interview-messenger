@@ -2,6 +2,7 @@
 real_responses/
 details.csv
 details2.csv
+backupinit.py
 
 # Service Account Credentials
 sac_creds/

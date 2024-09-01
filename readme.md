@@ -8,50 +8,6 @@ When building from source, install dependencies as follows -
     pip install -r requirements.txt
     ```
 2. Install a stable chrome and chrome driver version from [Chrome for Testing](https://googlechromelabs.github.io/chrome-for-testing/). (I used version 128). This is required as automated scripts can only work with chrome browsers for testing.
-3. Modify the python `alright` package as follows - 
-   1. Set path to chrome and chrome driver manually - 
-        In `site-packages/alright/__init__.py`, replace the following block of code under ``if not browser:``:
-        ```python    
-        browser = webdriver.Chrome(
-        ChromeDriverManager().install(),
-        options=self.chrome_options,
-        )
-        ```
-        with the following:
-        ```python
-        self.chrome_options.binary_location = "path/to/chrome"
-        self.chrome_options.executable_path="path/to/chromedriver"
-        browser = webdriver.Chrome(options=self.chrome_options)
-        ```
-    2. Make chrome browser headless \
-        Only do this after signing into WhatsApp in the browser once. This only works in linux for now. I haven't added the new line under win32 (windows) as I havent tested it on windows yet. \
-        In `site-packages/alright/__init__.py`, replace the following block of code:
-        ```python
-        @property
-        def chrome_options(self):
-            chrome_options = Options()
-            if sys.platform == "win32":
-                chrome_options.add_argument("--profile-directory=Default")
-                chrome_options.add_argument("--user-data-dir=C:/Temp/ChromeProfile")
-            else:
-                chrome_options.add_argument("start-maximized")
-                chrome_options.add_argument("--user-data-dir=./User_Data")
-        return chrome_options
-        ```
-        with the following:
-        ```python
-        @property
-        def chrome_options(self):
-            chrome_options = Options()
-            if sys.platform == "win32":
-                chrome_options.add_argument("--profile-directory=Default")
-                chrome_options.add_argument("--user-data-dir=C:/Temp/ChromeProfile")
-            else:
-                chrome_options.add_argument("--headless=new") # New line
-                chrome_options.add_argument("start-maximized")
-                chrome_options.add_argument("--user-data-dir=./User_Data")
-        return chrome_options
-        ```
 
 ## Download service account credentials file
 Set the service account credentials in ``sac_creds/credentials.json``. This is used to authenticate with the service account used to pull details from the google sheet and add notification status.
@@ -66,25 +22,32 @@ Variables you can use in the message are ``interview_time``, ``name``, ``date``,
 ## Set parameters
 In `parameters.yaml`, you can customize parameters like so - 
 ```yaml
-sheet_url: "<Insert sheet link here>" # Link to sheet (discard everything after the id i.e. from '/edit')
-sheet_name: "Form Responses 1" # Sheet name
+chrome_settings:
+  path_to_chrome: "/path/to/chrome" # path to chrome 
+  path_to_chromedriver: "/path/to/chromedriver" # path to chrome driver
+  headless: false # dont change from false, doesnt work
 
-date: "27/08/2024" # Date of interviews to be scheduled. Can be in any format
-start_time: "10:00" # Time(same format, 24hr) the first interview should start at
-end_time: "21:00" # Maximum time(same format, 24hr) at which the last interview should end by
-padding_minutes: 15 # Number of minutes to wait between each interview
-duration: 25 # Duration in minutes of each interview
-at_once: 6 # Number of interviews to schedule for the same time 
+sheet_settings:
+  sheet_url: "<Insert sheet link here>" # Link to sheet (discard everything after the id i.e. from '/edit')
+  sheet_name: "Form Responses 1" # Sheet name
 
-subsystem_preference: 1 # Subsystem preference number to be chosen for the interview.
-target_subsystem: "Artificial Intelligence" # Subsystem to schedule interviews for. Set empty string("") or null for no restrictions. This must be the same string as in the sheet
+interview_time_settings:
+  date: "27/08/2024" # Date(DD/MM/YYYY) of interviews to be scheduled.
+  start_time: "10:00" # Time(hh:mm 24hr) the first interview should start at
+  end_time: "21:00" # Maximum time(hh:mm 24hr) by which the last interview should end
+  padding_minutes: 15 # Number of minutes to wait between each interview
+  duration: 25 # Duration in minutes of each interview
+  at_once: 6 # Number of interviews to schedule for the same time 
 
-message_interval: 10 # Number of seconds to wait between sending consecutive whatsapp messages
+subsystem_settings:
+  subsystem_preference: 1 # Subsystem preference number to be chosen for the interview.
+  target_subsystem: "Artificial Intelligence" # Subsystem to schedule interviews for. Set empty string("") or null for no restrictions. This must be the same string as in the sheet
 
-timeout: 20 # Timeout for sending message (required to handle invalid phone numbers)
-max_timeout_tries: 3 # Maximum number of tries to try sending timing out messages
-
-notifier: "Janak" # Only rows with MemberNotify column equal to this value will be considered (to split sending messages among people)
+message_settings:
+  message_interval: 10 # Number of seconds to wait between sending consecutive whatsapp messages
+  timeout: 20 # Timeout for sending message (required to handle invalid phone numbers)
+  max_timeout_tries: 3 # Maximum number of tries to try sending timing out messages
+  notifier: "Janak" # Only rows with MemberNotify column equal to this value will be considered (to split sending messages among people)
 
 columns: # Enter names of columns in the sheet
   name: "Full Name"
@@ -96,11 +59,11 @@ columns: # Enter names of columns in the sheet
 ```
 
 ## Run
-1. Install the dependencies (if not using an executable)
+1. Install chrome and other dependencies
 2. Download the service account credentials file into `sac_creds/credentials.json`
 3. Set template message in `message.txt`
 4. Set parameters in `parameters.yaml`
-5. Run the file (if not using an executable)- 
+5. Run the file - 
     ```bash
     python3 main.py
     ```
