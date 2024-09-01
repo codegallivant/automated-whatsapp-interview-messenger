@@ -13,29 +13,31 @@ sheet_settings:
   interview_score_url: "https://docs.google.com/spreadsheets/d/1yWSKJLjUh5LwDMWezlp5M19feaXBRMIO87wFQZQ3FV8"
 
 interview_time_settings:
-  date: "[PUT DATE HERE]"
-  start_time: "[PUT TIME HERE]"
-  end_time: "[PUT TIME HERE]"
-  padding_minutes: 15
-  duration: 25
-  at_once: 6
+  date: "03/09/2024"
+  start_time: "18:00"
+  end_time: "21:00"
+  padding_minutes: 10
+  duration: 30
+  at_once: 2
 
 subsystem_settings:
   subsystem_preference: 1
-  target_subsystem: "[PUT SUBSYSTEM HERE]"
+  target_subsystem: "Management"
 
 message_settings:
-  message_interval: 5
+  message_interval: 10
   timeout: 30
   max_timeout_tries: 3
-  notifier: "[PUT NAME HERE]"
+  notifier: "<your name>"
 
 columns:
   name: "Full Name"
   whatsapp_number: "WhatsApp Number"
+  mobile_number: "Mobile Number"
   preference1: "First Preference of Subsystem"
   preference2: "Second Preference of Subsystem"
   branch: "Branch"
   email: "Learner ID (@learner.manipal.edu)"
   first_year: "This form is only for First Year Students. Are you in First Year?"
   notifier: "MemberNotifier"
+

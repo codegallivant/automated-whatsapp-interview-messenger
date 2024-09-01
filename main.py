@@ -12,6 +12,8 @@ import pandas as pd
 from oauth2client.service_account import ServiceAccountCredentials
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+import re
+
 
 
 def permission_to_continue():
@@ -102,13 +104,13 @@ def get_filtered_sheet():
 
     filtered_df = df[df[PARAMS["columns"]["notifier"]] == PARAMS["notifier"]]
     
+    filtered_df = filtered_df[filtered_df[PARAMS["columns"]["first_year"]]=="Yes"]
+
     preference_columns = [PARAMS["columns"]["preference1"], PARAMS["columns"]["preference2"]]
     if PARAMS["target_subsystem"] not in [None, ""]:
         filtered_df = filtered_df[filtered_df[preference_columns[PARAMS["subsystem_preference"]-1]].apply(validate_subsystem_field)]
         # filtered_df = filtered_df[filtered_df[preference_columns[PARAMS["subsystem_preference"]-1]]==PARAMS["target_subsystem"]]
     
-    filtered_df = filtered_df[filtered_df[PARAMS["columns"]["first_year"]]=="Yes"]
-
     if "Notified_"+PARAMS["target_subsystem"] in filtered_df.keys():
         filtered_df = filtered_df[filtered_df["Notified_"+PARAMS["target_subsystem"]].apply(validate_notification_field)]
 
@@ -226,36 +228,35 @@ def send_message(name, phone_number, message):
 
 
 def calculate_time(i, start_time, end_time, duration, padding_minutes):
-    hours = int(start_time.split(":")[0])
-    minutes = int(start_time.split(":")[1])
-    
-    minutes_increase = i*(duration+padding_minutes)
-    
-    this_start_datetime_obj = (datetime.datetime.combine(datetime.date.today(), datetime.time(hours, minutes))+datetime.timedelta(minutes=minutes_increase))
-    this_start_time_obj = this_start_datetime_obj.time()
-    this_start_time_hours = this_start_time_obj.hour
-    this_start_time_minutes = this_start_time_obj.minute
-
-    this_end_datetime_obj = this_start_datetime_obj + datetime.timedelta(minutes=duration)
-    this_end_time_obj = this_end_datetime_obj.time()
-    this_end_time_hour = this_end_time_obj.hour
-    this_end_time_minutes = this_end_time_obj.minute
-    end_hour = int(end_time.split(":")[0])
-    end_minutes = int(end_time.split(":")[1])
-    
-    if this_end_time_hour == end_hour:
-        if this_end_time_minutes >= end_minutes:
-            return False
-    if this_end_time_hour > end_hour:
+    start = datetime.datetime.strptime(start_time, "%H:%M")
+    end = datetime.datetime.strptime(end_time, "%H:%M")
+    total_available_minutes = (end - start).total_seconds() / 60
+    time_per_interview = duration + padding_minutes
+    if i * time_per_interview + duration > total_available_minutes:
         return False
+    interview_start_time = start + datetime.timedelta(minutes=i * time_per_interview)
+    return interview_start_time.strftime("%H:%M")
+
+
+def format_phone_number(phone_number, phone_number_backup):
+    if phone_number.lower().strip() == "same":
+        return str(format_phone_number(phone_number_backup))
+    # Extract only digits from the input string
+    digits = re.findall(r'\d+', phone_number)
+    digits_only = ''.join(digits)
     
-    if this_start_time_minutes < 10:
-        this_start_time_minutes = "0"+str(this_start_time_minutes)
+    # Check if the number has a country code (i.e., if it starts with a digit and is longer than 10 digits)
+    if len(digits_only) > 10 and not digits_only.startswith('0'):
+        # Check if the number already starts with '+', indicating a valid country code is likely present
+        if phone_number.strip().startswith('+'):
+            return f"+{digits_only}"
+        else:
+            return f"+{digits_only}"
     
-    interview_time = str(this_start_time_hours)+":"+str(this_start_time_minutes)
-    # print(interview_time)
+    # If the number does not include a country code, add +91
+    formatted_number = f"+91{digits_only}"
     
-    return interview_time
+    return formatted_number
 
 
 details = get_filtered_sheet()
@@ -296,7 +297,7 @@ selected_indexes_values = list()
 for index, row in details.iterrows():
     # print(row)
     name = row[PARAMS['columns']['name']]
-    phone_number = row[PARAMS['columns']['whatsapp_number']]
+    phone_number = format_phone_number(row[PARAMS['columns']['whatsapp_number']], row[PARAMS['columns']['mobile_number']])
     preference_columns = [PARAMS["columns"]["preference1"], PARAMS["columns"]["preference2"]]
     subsystem = row[preference_columns[PARAMS["subsystem_preference"]-1]]
     

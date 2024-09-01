@@ -1,6 +1,6 @@
 alright==2.61
 gspread==6.1.2
 oauth2client==4.1.3
-pandas==2.2.2
+pandas
 PyYAML==6.0.1
 selenium==4.24.0

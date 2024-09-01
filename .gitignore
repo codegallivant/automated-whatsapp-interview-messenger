@@ -12,4 +12,10 @@ build/
 dist/
 main.spec
 
+# Browser user data
 User_Data/
+User_Data_Aditi/
+
+# My settings.yaml file
+mysettings.yaml
+

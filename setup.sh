@@ -1,3 +1,8 @@
+echo "Installing and updating"
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install python3-pip
+
 echo "Working in Current Directory"
 
 mkdir -p ManasInterviews2024 && cd ManasInterviews2024
