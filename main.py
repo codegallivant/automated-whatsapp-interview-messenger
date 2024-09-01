@@ -88,6 +88,9 @@ def get_filtered_sheet():
     def validate_notification_field(string):
         return (string[:len('notified')].lower() != 'notified') and (string != 'Message timed out')
 
+    def validate_subsystem_field(string):
+        return string.lower().strip() == PARAMS["target_subsystem"].lower().strip()
+
     sheet_url = PARAMS["target_sheet_url"]
     worksheet_name = PARAMS["target_worksheet_name"]
 
@@ -101,7 +104,8 @@ def get_filtered_sheet():
     
     preference_columns = [PARAMS["columns"]["preference1"], PARAMS["columns"]["preference2"]]
     if PARAMS["target_subsystem"] not in [None, ""]:
-        filtered_df = filtered_df[filtered_df[preference_columns[PARAMS["subsystem_preference"]-1]]==PARAMS["target_subsystem"]]
+        filtered_df = filtered_df[filtered_df[preference_columns[PARAMS["subsystem_preference"]-1]].apply(validate_subsystem_field)]
+        # filtered_df = filtered_df[filtered_df[preference_columns[PARAMS["subsystem_preference"]-1]]==PARAMS["target_subsystem"]]
     
     filtered_df = filtered_df[filtered_df[PARAMS["columns"]["first_year"]]=="Yes"]
 
