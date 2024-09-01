@@ -37,7 +37,7 @@ def print_params(params):
             print(param, ":", params[param])
 
 
-with open("parameters.yaml") as stream:
+with open("settings.yaml") as stream:
     try:
         formatted_params = yaml.safe_load(stream)
         print_params(formatted_params)
@@ -89,8 +89,8 @@ def get_filtered_sheet():
     def validate_notification_field(string):
         return (string[:len('notified')].lower() != 'notified') and (string != 'Message timed out')
 
-    sheet_url = PARAMS["sheet_url"]
-    worksheet_name = PARAMS["sheet_name"]
+    sheet_url = PARAMS["target_sheet_url"]
+    worksheet_name = PARAMS["target_worksheet_name"]
 
     sheet = authenticate_sheet(sheet_url, worksheet_name)
 
@@ -345,4 +345,4 @@ for index, row in details.iterrows():
     time.sleep(message_interval)
     print()
 
-update_sheet_values(PARAMS["sheet_url"], PARAMS["sheet_name"], "Notified_"+PARAMS["target_subsystem"], selected_indexes, selected_indexes_values)
+update_sheet_values(PARAMS["target_sheet_url"], PARAMS["target_worksheet_name"], "Notified_"+PARAMS["target_subsystem"], selected_indexes, selected_indexes_values)

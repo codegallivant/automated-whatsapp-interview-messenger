@@ -8,10 +8,7 @@ backupinit.py
 sac_creds/
 
 # Parameters
-parameters.yaml
-
-# Program to sync copy of responses with original
-sync_sheets.py
+settings.yaml
 
 # Executable
 build/
