@@ -7,7 +7,6 @@ from alright import WhatsApp
 import sys
 import multiprocessing
 import time
-import csv
 import gspread
 import pandas as pd
 from oauth2client.service_account import ServiceAccountCredentials
@@ -135,27 +134,6 @@ def update_sheet_values(sheet_url, worksheet_name, update_column, row_indexes, u
 
     sheet.batch_update(updates)
     print(f"Updated {len(updates)} cells in column '{update_column}'")
-
-
-def add_column_value(file_path, new_column, value, row_index):
-    with open(file_path, 'r', newline='') as file:
-        reader = csv.reader(file)
-        rows = list(reader)    
-    headers = rows[0]
-    if new_column not in headers:
-        headers.append(new_column)
-        for row in rows[1:]:
-            row.append('')
-    column_index = headers.index(new_column)
-    if 0 <= row_index < len(rows):
-        rows[row_index][column_index] = value
-    else:
-        print(f"Row index {row_index} is out of range.")
-        return
-    with open(file_path, 'w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerows(rows)    
-    # print(f"Added value '{value}' to column '{new_column}' at row {row_index}")
 
 
 def run_with_timeout(func, args=(), kwargs={}, timeout=5):
