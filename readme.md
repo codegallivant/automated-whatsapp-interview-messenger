@@ -59,7 +59,7 @@ columns: # Enter names of columns in the sheet
 ```
 
 ## Run
-1. Install chrome and other dependencies
+1. Install [Chrome for Testing](https://googlechromelabs.github.io/chrome-for-testing/) and other dependencies
 2. Download the service account credentials file into `sac_creds/credentials.json`
 3. Set template message in `message.txt`
 4. Set parameters in `parameters.yaml`
