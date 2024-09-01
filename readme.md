@@ -83,8 +83,11 @@ message_settings:
 columns: # Enter names of columns in the sheet
   name: "Full Name"
   whatsapp_number: "WhatsApp Number"
+  mobile_number: "Mobile Number"
   preference1: "First Preference of Subsystem"
   preference2: "Second Preference of Subsystem"
+  branch: "Branch"
+  email: "Learner ID (@learner.manipal.edu)"
   first_year: "This form is only for First Year Students. Are you in First Year?"
   notifier: "MemberNotifier"
 ```
