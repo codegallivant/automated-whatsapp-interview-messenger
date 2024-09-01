@@ -20,7 +20,7 @@ print("Loaded settings.")
 def sync_sheets(source_sheet_url, target_sheet_url, source_worksheet_name, target_worksheet_name):
     try:
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-        creds = ServiceAccountCredentials.from_json_keyfile_name('sac_creds/credentials.json', scope)
+        creds = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scope)
         client = gspread.authorize(creds)
         print("Credentials loaded successfully.")
 
