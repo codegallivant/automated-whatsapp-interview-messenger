@@ -7,9 +7,6 @@ backupinit.py
 # Service Account Credentials
 sac_creds/
 
-# Parameters
-settings.yaml
-
 # Executable
 build/
 dist/

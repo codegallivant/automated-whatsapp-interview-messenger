@@ -1,0 +1,41 @@
+chrome_settings:
+  path_to_chrome: "../chrome-linux64/chrome"
+  path_to_chromedriver: "../chromedriver-linux64/chromedriver"
+  headless: false
+
+sheet_settings:
+  source_sheet_url: "https://docs.google.com/spreadsheets/d/18y1AOc-xN4ChmTi-7Aki5YoHoZEX0lbY-AkceMC985E"
+  source_worksheet_name: "Form Responses 1"
+  
+  target_sheet_url: "https://docs.google.com/spreadsheets/d/16cEyI66gi5si6MrYEsKqMrTnX5hJ2m8AEy1_1yYR40Q"
+  target_worksheet_name: "Form Responses 1"
+
+  interview_score_url: "https://docs.google.com/spreadsheets/d/1yWSKJLjUh5LwDMWezlp5M19feaXBRMIO87wFQZQ3FV8"
+
+interview_time_settings:
+  date: "[PUT DATE HERE]"
+  start_time: "[PUT TIME HERE]"
+  end_time: "[PUT TIME HERE]"
+  padding_minutes: 15
+  duration: 25
+  at_once: 6
+
+subsystem_settings:
+  subsystem_preference: 1
+  target_subsystem: "[PUT SUBSYSTEM HERE]"
+
+message_settings:
+  message_interval: 5
+  timeout: 30
+  max_timeout_tries: 3
+  notifier: "[PUT NAME HERE]"
+
+columns:
+  name: "Full Name"
+  whatsapp_number: "WhatsApp Number"
+  preference1: "First Preference of Subsystem"
+  preference2: "Second Preference of Subsystem"
+  branch: "Branch"
+  email: "Learner ID (@learner.manipal.edu)"
+  first_year: "This form is only for First Year Students. Are you in First Year?"
+  notifier: "MemberNotifier"

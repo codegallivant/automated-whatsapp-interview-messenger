@@ -1,7 +1,31 @@
 # automated-whatsapp-interview-messenger
 Automatic whatsapp messenger & scheduler for interviews at project MANAS
 
-## Dependencies 
+## Automated Setup
+
+Run the following script through an Ubuntu shell or WSL instance.
+
+```sh
+wget https://raw.githubusercontent.com/codegallivant/automated-whatsapp-interview-messenger/master/setup.sh
+chmod +x setup.sh
+./setup.sh
+```
+
+> [!IMPORTANT]
+> Modify the `settings.yaml` file in the placeholder sections.
+> Download the `credentials.json` file and put it into `sac_creds/credentials.json`.
+
+Once these steps are complete, run the `main.py` script.
+
+```sh
+python3 main.py
+```
+
+---
+
+## Manual Setup
+
+### Dependencies 
 When building from source, install dependencies as follows -
 1. Install pip modules - 
     ```bash
@@ -9,10 +33,10 @@ When building from source, install dependencies as follows -
     ```
 2. Install a stable chrome and chrome driver version from [Chrome for Testing](https://googlechromelabs.github.io/chrome-for-testing/). (I used version 128). This is required as automated scripts can only work with chrome browsers for testing.
 
-## Download service account credentials file
+### Download service account credentials file
 Set the service account credentials in ``sac_creds/credentials.json``. This is used to authenticate with the service account used to pull details from the google sheet and add notification status.
 
-## Set template message
+### Set template message
 Modify/create a file called `message.txt` in the same directory as the script and set the contents. Use the format ``${variable_name}`` to insert variables like ``name`` or ``interview_time`` etc. For example:
 ```
 Hello ${name}, this message is a confirmation of your Project Manas ${subsystem} interview. 
@@ -22,7 +46,7 @@ Reply to confirm.
 ```
 Variables you can use in the message are ``interview_time``, ``name``, ``date``, ``subsystem``.
 
-## Set settings
+### Set settings
 In `settings.yaml`, you can customize settings like so - 
 ```yaml
 chrome_settings:
@@ -65,7 +89,7 @@ columns: # Enter names of columns in the sheet
   notifier: "MemberNotifier"
 ```
 
-## Run
+### Run
 1. Install a browser and driver from [Chrome for Testing](https://googlechromelabs.github.io/chrome-for-testing/) and other dependencies
 2. Download the service account credentials file into `sac_creds/credentials.json`
 3. Set template message in `message.txt`
@@ -75,7 +99,7 @@ columns: # Enter names of columns in the sheet
     python3 main.py
     ```
 
-## Sync target with source sheet
+### Sync target with source sheet
 Run 
 ```bash
 python3 sync_sheets.py
