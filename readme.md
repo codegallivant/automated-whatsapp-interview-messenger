@@ -47,7 +47,7 @@ message_settings:
   message_interval: 10 # Number of seconds to wait between sending consecutive whatsapp messages
   timeout: 20 # Timeout for sending message (required to handle invalid phone numbers)
   max_timeout_tries: 3 # Maximum number of tries to try sending timing out messages
-  notifier: "Janak" # Only rows with MemberNotify column equal to this value will be considered (to split sending messages among people)
+  notifier: "<your name>" # Only rows with MemberNotify column equal to this value will be considered (to split sending messages among people)
 
 columns: # Enter names of columns in the sheet
   name: "Full Name"
