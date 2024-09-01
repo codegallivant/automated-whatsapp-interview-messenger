@@ -15,7 +15,10 @@ Set the service account credentials in ``sac_creds/credentials.json``. This is u
 ## Set template message
 Modify/create a file called `message.txt` in the same directory as the script and set the contents. Use the format ``${variable_name}`` to insert variables like ``name`` or ``interview_time`` etc. For example:
 ```
-Hello ${name}. Greetings from Project MANAS. Your interview for ${subsystem} is scheduled for ${date} at ${interview_time}.
+Hello ${name}, this message is a confirmation of your Project Manas ${subsystem} interview. 
+Your interview has been scheduled on ${date} at ${interview_time}. You are requested to come to the workshop 10 minutes prior to the given time slot. 
+Our workshop location is: https://g.page/project-manas-manipal?share 
+Reply to confirm.
 ```
 Variables you can use in the message are ``interview_time``, ``name``, ``date``, ``subsystem``.
 
@@ -71,3 +74,10 @@ columns: # Enter names of columns in the sheet
     ```bash
     python3 main.py
     ```
+
+## Sync target with source sheet
+Run 
+```bash
+python3 sync_sheets.py
+```
+to sync the target sheet with the source sheet. Avoid running this too frequently.
