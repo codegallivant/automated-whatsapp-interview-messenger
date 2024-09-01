@@ -3,7 +3,7 @@ Automatic whatsapp messenger & scheduler for interviews at project MANAS
 
 ## Automated Setup
 
-Run the following script through an Ubuntu shell or WSL instance.
+Run the following script through an Ubuntu shell or WSL instance (required for Windows machines).
 
 ```sh
 wget https://raw.githubusercontent.com/codegallivant/automated-whatsapp-interview-messenger/master/setup.sh
@@ -13,7 +13,7 @@ chmod +x setup.sh
 
 > [!IMPORTANT]
 > Modify the `settings.yaml` file in the placeholder sections.
-> Download the `credentials.json` file and put it into `sac_creds/credentials.json`.
+> Download the `credentials.json` file and put it into the project root directory.
 
 Once these steps are complete, run the `main.py` script.
 
@@ -91,7 +91,7 @@ columns: # Enter names of columns in the sheet
 
 ### Run
 1. Install a browser and driver from [Chrome for Testing](https://googlechromelabs.github.io/chrome-for-testing/) and other dependencies
-2. Download the service account credentials file into `sac_creds/credentials.json`
+2. Download the service account credentials file into `credentials.json`
 3. Set template message in `message.txt`
 4. Set settings in `settings.yaml`
 5. Run the file - 
