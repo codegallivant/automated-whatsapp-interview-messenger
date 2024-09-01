@@ -39,23 +39,18 @@ def get_filtered_sheet(sheet_url, worksheet_name):
         match = re.search(date_pattern, string)
         
         if match:
-            # Extract the date from the match
             date_str = match.group(1)
-            
-            # Convert the string to a date object
             date_obj = datetime.datetime.strptime(date_str, '%d/%m/%Y')
-            
-            # Get today's date
             today = datetime.datetime.today()
-            
-            # Check if the found date is today's date
             if date_obj.date() == today.date():
                 return True
         return False
 
-    print(find_and_check_date("notified: 02/09/2024 10:00"))
     def validate_notification_field(string):
         return (string[:len('notified')].lower() == 'notified') and find_and_check_date(string)
+
+    def validate_subsystem_field(string):
+        return string.lower().strip() == PARAMS["subsystem_settings"]["target_subsystem"].lower().strip()
 
     sheet = authenticate_sheet(sheet_url, worksheet_name)
 
@@ -65,11 +60,11 @@ def get_filtered_sheet(sheet_url, worksheet_name):
     
     preference_columns = [PARAMS["columns"]["preference1"], PARAMS["columns"]["preference2"]]
     if PARAMS["subsystem_settings"]["target_subsystem"] not in [None, ""]:
-        filtered_df = df[((df[preference_columns[0]] == PARAMS["subsystem_settings"]["target_subsystem"]) | 
-                        (df[preference_columns[1]] == PARAMS["subsystem_settings"]["target_subsystem"]))]    
+        filtered_df = df[df[preference_columns[0]].apply(validate_subsystem_field) | 
+                        df[preference_columns[1]].apply(validate_subsystem_field)]    
     filtered_df = filtered_df[filtered_df[PARAMS["columns"]["first_year"]]=="Yes"]
 
-    print(filtered_df["Notified_"+PARAMS["subsystem_settings"]["target_subsystem"]].apply(validate_notification_field))
+    # print(filtered_df["Notified_"+PARAMS["subsystem_settings"]["target_subsystem"]].apply(validate_notification_field))
     if "Notified_"+PARAMS["subsystem_settings"]["target_subsystem"] in filtered_df.keys():
         filtered_df = filtered_df[filtered_df["Notified_"+PARAMS["subsystem_settings"]["target_subsystem"]].apply(validate_notification_field)]
 
