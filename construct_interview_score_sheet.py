@@ -120,19 +120,28 @@ for column in columns:
 columns = tempcolumns
     
 
-subsystems = [
-    # "Artificial Intelligence",
-    "Sensing And Automation",
-    # "Management",
-    # "Mechanical"
-]
-for subsystem in subsystems:
+technical_columns = ["Interviewer 1","Interviewer 2","Technical Score 1", "Technical Score 2", "Ethu Score 1", "Enthu Score 2", 
+                "Technical average", "Verdict 1", "Verdict 2", "Additional Comments", "Cock Score"]
+
+sna_columns = ["Interviewer", "Technical Score", "Enthu Score", "Technical Average", "Additional Comments", "Cock Score"]
+
+management_columns = ["Communication (3)", "Aptitude(2)", "Creativity(3)" ,"Graphics(2)", "Videography/Webdev(3)", "Admin", "Finance/PR(2)","Cock Score","TOTAL(10)","Additional Comments"]
+
+subsystems = {
+    # "Artificial Intelligence": technical_columns,
+    # "Sensing And Automation": technical_columns,
+    # "Management": management_columns,
+    "Mechanical": technical_columns
+}
+
+for subsystem in subsystems.keys():
     # Get filtered data from the target sheet and worksheet
     df = get_filtered_sheet(PARAMS['sheet_settings']['target_sheet_url'], PARAMS['sheet_settings']['target_worksheet_name'], subsystem)[columns]
 
     # Add additional columns with empty values
-    new_columns = ["Technical Score 1", "Technical Score 2", "Ethu Score 1", "Enthu Score 2", 
-                "Technical average", "Verdict 1", "Verdict 2", "Additional Comments"]
+    new_columns = subsystems[subsystem]
+    # new_columns = ["Interviewer 1","Interviewer 2","Technical Score 1", "Technical Score 2", "Enthu Score 1", "Enthu Score 2", 
+    #             "Technical average", "Verdict 1", "Verdict 2", "Additional Comments"]
     for column in new_columns:
         df[column] = len(df) * ['']
 

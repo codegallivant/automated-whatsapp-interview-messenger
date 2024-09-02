@@ -32,6 +32,7 @@ message_settings:
 
 columns:
   name: "Full Name"
+  registration_number: "Registration No. "
   branch: "Branch"
   whatsapp_number: "WhatsApp Number"
   mobile_number: "Mobile Number"
@@ -42,4 +43,3 @@ columns:
   description: "Tell us about yourself."
   first_year: "This form is only for First Year Students. Are you in First Year?"
   notifier: "MemberNotifier"
-
