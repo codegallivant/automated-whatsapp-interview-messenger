@@ -273,7 +273,7 @@ with open("message.txt") as f:
 index_pairs = parse_template_message(template_message)
 
 print("Example message:")
-print(synthesise_message(template_message, index_pairs, "Abc Dfg", "Artificial Intelligence", "27/08/2024", "19:00"))
+print(synthesise_message(template_message, index_pairs, "Abc Dfg", PARAMS["target_subsystem"], PARAMS["date"], PARAMS["start_time"]))
 
 permission_to_continue()
 
