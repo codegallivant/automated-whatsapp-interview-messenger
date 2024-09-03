@@ -28,8 +28,7 @@ def authenticate_sheet(sheet_url, worksheet_name):
 def get_filtered_sheet(sheet_url, worksheet_name, target_subsystem):
     
     def find_and_check_date(string):
-        # Regular expression to match dates in DD/MM/YYYY format
-        date_pattern = r'\b(\d{2}/\d{2}/\d{4})\b'
+        date_pattern = r'\b(\d{1,2}/\d{1,2}/\d{4})\b'
         match = re.search(date_pattern, string)
         if match:
             return True
@@ -58,7 +57,18 @@ def get_filtered_sheet(sheet_url, worksheet_name, target_subsystem):
     filtered_df['id'] = filtered_df.index + 2  # Add 2 to match the row number in the sheet (considering header)
     filtered_df['Interview Date'] = filtered_df[notified_column].apply(lambda x: re.search(r'\b(\d{1,2}/\d{1,2}/\d{4})\b', x).group() if re.search(r'\b(\d{1,2}/\d{1,2}/\d{4})\b', x) else '')
     filtered_df['Interview Time'] = filtered_df[notified_column].apply(lambda x: re.search(r'(\d{1,2}:\d{2})', x).group() if re.search(r'(\d{1,2}:\d{2})', x) else '')
+
+    # Convert date and time to datetime for sorting
+    try:
+        filtered_df['Interview Datetime'] = pd.to_datetime(filtered_df['Interview Date'] + ' ' + filtered_df['Interview Time'], format='%d/%m/%Y %H:%M', errors='coerce')
+    except Exception as e:
+        print("Error in datetime conversion:", e)
+        print(filtered_df[['Interview Date', 'Interview Time']])  # Debugging info
     
+    # Check if 'Interview Datetime' was created
+    if 'Interview Datetime' not in filtered_df.columns:
+        raise KeyError("Interview Datetime column was not created successfully.")
+
     # Ensure 'id' is the first column in the DataFrame
     columns = ['id'] + [col for col in filtered_df.columns if col != 'id']
     filtered_df = filtered_df[columns]
@@ -80,6 +90,14 @@ def append_df_to_sheet(df, sheet_url, worksheet_name):
         headers = df.columns.tolist()  # Headers with 'id' as the first column
         worksheet.update('A1', [headers])
         print(f"Worksheet '{worksheet_name}' created with {num_columns} columns.")
+
+    # Ensure sorting by Interview Datetime before appending
+    if 'Interview Datetime' in df.columns:
+        df = df.sort_values(by='Interview Datetime')
+        # Drop the 'Interview Datetime' column before appending
+        df = df.drop(columns=['Interview Datetime'])
+    else:
+        print("'Interview Datetime' column not found for sorting.")
 
     # Get existing data from the worksheet
     existing_data = worksheet.get_all_values()
@@ -110,15 +128,13 @@ def append_df_to_sheet(df, sheet_url, worksheet_name):
     return sheet_url
 
 # Define the columns to be used
-
 columns = PARAMS['columns']
 column_aliases = PARAMS['columns'].keys()
 columns = [PARAMS['columns'][alias] for alias in column_aliases if alias not in ['first_year', 'notifier']]
-tempcolumns = ['id', 'Interview Date', 'Interview Time']
+tempcolumns = ['id', 'Interview Date', 'Interview Time', 'Interview Datetime']
 for column in columns:
     tempcolumns.append(column)
 columns = tempcolumns
-    
 
 technical_columns = ["Interviewer 1","Interviewer 2","Technical Score 1", "Technical Score 2", "Ethu Score 1", "Enthu Score 2", 
                 "Technical average", "Verdict 1", "Verdict 2", "Additional Comments", "Cock Score"]
@@ -128,10 +144,10 @@ sna_columns = ["Interviewer", "Technical Score", "Enthu Score", "Technical Avera
 management_columns = ["Communication (3)", "Aptitude(2)", "Creativity(3)" ,"Graphics(2)", "Videography/Webdev(3)", "Admin", "Finance/PR(2)","Cock Score","TOTAL(10)","Additional Comments"]
 
 subsystems = {
-    # "Artificial Intelligence": technical_columns,
-    # "Sensing And Automation": technical_columns,
+    "Artificial Intelligence": technical_columns,
+    "Sensing And Automation": sna_columns,
     # "Management": management_columns,
-    "Mechanical": technical_columns
+    # "Mechanical": technical_columns
 }
 
 for subsystem in subsystems.keys():
@@ -140,8 +156,6 @@ for subsystem in subsystems.keys():
 
     # Add additional columns with empty values
     new_columns = subsystems[subsystem]
-    # new_columns = ["Interviewer 1","Interviewer 2","Technical Score 1", "Technical Score 2", "Enthu Score 1", "Enthu Score 2", 
-    #             "Technical average", "Verdict 1", "Verdict 2", "Additional Comments"]
     for column in new_columns:
         df[column] = len(df) * ['']
 
