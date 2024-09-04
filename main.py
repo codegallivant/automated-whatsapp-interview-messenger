@@ -240,7 +240,7 @@ def calculate_time(i, start_time, end_time, duration, padding_minutes):
 
 def format_phone_number(phone_number, phone_number_backup):
     if phone_number.lower().strip() == "same":
-        return str(format_phone_number(phone_number_backup))
+        return str(format_phone_number(phone_number_backup, None))
     # Extract only digits from the input string
     digits = re.findall(r'\d+', phone_number)
     digits_only = ''.join(digits)
