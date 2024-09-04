@@ -201,7 +201,7 @@ def synthesise_message(template_message, index_pairs, name, subsystem, date, int
     return message
 
 
-def send_message(name, phone_number, message):
+def send_message(name, phone_number, message, backup_phone_number = None):
     phone_number = str(phone_number)
     if len(phone_number)==10:
         phone_number = "+91" + phone_number
@@ -216,7 +216,10 @@ def send_message(name, phone_number, message):
                 timeout_tries += 1
                 print(f"Attempt {timeout_tries}: Message timed out")
                 if timeout_tries == PARAMS["max_timeout_tries"]:
-                    return False
+                    if backup_phone_number:
+                        return send_message(name, backup_phone_number,message)
+                    else:
+                        return False
             else:
                 return True
         except Exception as e:
@@ -238,9 +241,9 @@ def calculate_time(i, start_time, end_time, duration, padding_minutes):
     return interview_start_time.strftime("%H:%M")
 
 
-def format_phone_number(phone_number, phone_number_backup):
-    if phone_number.lower().strip() == "same":
-        return str(format_phone_number(phone_number_backup, None))
+def format_phone_number(phone_number, phone_number_backup = None):
+    if phone_number.lower().strip() == "same" and phone_number_backup:
+        return str(format_phone_number(phone_number_backup))
     # Extract only digits from the input string
     digits = re.findall(r'\d+', phone_number)
     digits_only = ''.join(digits)
@@ -296,8 +299,9 @@ selected_indexes = list()
 selected_indexes_values = list()
 for index, row in details.iterrows():
     # print(row)
-    name = row[PARAMS['columns']['name']]
-    phone_number = format_phone_number(row[PARAMS['columns']['whatsapp_number']], row[PARAMS['columns']['mobile_number']])
+    name = row[PARAMS['columns']['name']
+    backup_phone_number = row[PARAMS["columns"]["mobile_number"]]
+    phone_number = format_phone_number(row[PARAMS['columns']['whatsapp_number']], phone_number_backup=row[PARAMS['columns']['mobile_number']])
     preference_columns = [PARAMS["columns"]["preference1"], PARAMS["columns"]["preference2"]]
     subsystem = row[preference_columns[PARAMS["subsystem_preference"]-1]]
     
@@ -312,7 +316,7 @@ for index, row in details.iterrows():
     
     print(f"Attempting to schedule: Interview {i+1}/{len(details)} (Row {index+1}) @ {interview_time} for {subsystem} [{name}({phone_number})]")
     message = synthesise_message(template_message, index_pairs, name, subsystem, PARAMS["date"], interview_time)
-    message_status = send_message(name, phone_number, message)
+    message_status = send_message(name, phone_number, message, backup_phone_number)
     selected_indexes.append(row["id"])
     if message_status == True:
         i+=1
