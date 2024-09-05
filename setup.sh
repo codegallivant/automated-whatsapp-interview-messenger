@@ -22,8 +22,13 @@ git clone https://github.com/codegallivant/automated-whatsapp-interview-messenge
 echo "Downloaded Automation Script"
 cd automated-whatsapp-interview-messenger
 
+# Set settings filepath
+mv settings/template_settings.yaml settings/settings.yaml
+echo "settings/settings.yaml" > settings_path.txt
+
 # Requirements
 echo "Installing Python Requirements"
 pip install -r requirements.txt
+
 
 echo "Done. Run 'python main.py' to start the automation script."

@@ -50,8 +50,8 @@ Variables you can use in the message are ``interview_time``, ``name``, ``date``,
 In `settings.yaml`, you can customize settings like so - 
 ```yaml
 chrome_settings:
-  path_to_chrome: "/path/to/chrome" # path to chrome 
-  path_to_chromedriver: "/path/to/chromedriver" # path to chrome driver
+  path_to_chrome: "../chrome-linux64/chrome" # path to chrome
+  path_to_chromedriver: "../chromedriver-linux64/chromedriver" # path to chrome driver
   headless: false # dont change from false, doesnt work
 
 sheet_settings:
@@ -61,6 +61,10 @@ sheet_settings:
   # Target sheet details (Sheet being modified by program and synced with source sheet)
   target_sheet_url: "<Insert sheet link here>" # Link to sheet (discard everything after the id i.e. from '/edit')
   target_worksheet_name: "Form Responses 1" # Sheet name
+
+  # Interview score sheet details
+  interview_score_url: "<Insert sheet link here>" # Link to sheet (discard everything after the id i.e. from '/edit')
+
 
 interview_time_settings:
   date: "27/08/2024" # Date(DD/MM/YYYY) of interviews to be scheduled.
@@ -78,18 +82,29 @@ message_settings:
   message_interval: 10 # Number of seconds to wait between sending consecutive whatsapp messages
   timeout: 20 # Timeout for sending message (required to handle invalid phone numbers)
   max_timeout_tries: 3 # Maximum number of tries to try sending timing out messages
-  notifier: "<your name>" # Only rows with MemberNotify column equal to this value will be considered (to split sending messages among people)
+  timeout_attempt_interval: 5
 
-columns: # Enter names of columns in the sheet
+notifier_settings:
+  notifier: "<your-name>" # Chrome user data will be attached to this name. 
+  check_notifier_column: false # If set to true, only rows where member notifier matches the notifier specified will be picked 
+
+columns:
   name: "Full Name"
+  registration_number: "Registration No. " 
+  branch: "Branch"
   whatsapp_number: "WhatsApp Number"
   mobile_number: "Mobile Number"
+  email_id: "Email Address"
+  learner_id: "Learner ID (@learner.manipal.edu)"
   preference1: "First Preference of Subsystem"
   preference2: "Second Preference of Subsystem"
-  branch: "Branch"
-  email: "Learner ID (@learner.manipal.edu)"
+  description: "Tell us about yourself."
   first_year: "This form is only for First Year Students. Are you in First Year?"
   notifier: "MemberNotifier"
+
+testing: # for testing without sending messages to others
+  test_mode: false
+  recipient_phone_number: "<phone number>"
 ```
 
 ### Run

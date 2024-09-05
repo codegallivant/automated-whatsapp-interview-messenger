@@ -49,5 +49,5 @@ columns:
   notifier: "MemberNotifier"
 
 testing:
-  test_mode: true
+  test_mode: false
   recipient_phone_number: "<phone number>"
