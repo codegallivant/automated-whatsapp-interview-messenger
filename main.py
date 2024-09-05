@@ -13,7 +13,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import re
-
+import os
 
 
 def permission_to_continue():
@@ -38,18 +38,28 @@ def print_params(params):
             print(param, ":", params[param])
 
 
-with open("settings.yaml") as stream:
-    try:
-        formatted_params = yaml.safe_load(stream)
-        print_params(formatted_params)
-        print()
-    except yaml.YAMLError as exc:
-        print(exc)
+with open("settings_path.txt") as f:
+    settings_path = f.read()
+
+print("Settings path:", settings_path)
+
+if os.path.exists(settings_path):
+    with open(settings_path) as stream:
+        try:
+            formatted_params = yaml.safe_load(stream)
+            print_params(formatted_params)
+            print()
+        except yaml.YAMLError as exc:
+            print(exc)
+else:
+    print(f"{settings_path} not found")
+    sys.exit()
 
 PARAMS = dict()
 PARAMS["columns"] = formatted_params["columns"]
+PARAMS["testing"] = formatted_params["testing"]
 for param in formatted_params.keys():
-    if param != "columns":
+    if param not in ["columns","testing"]:
         if isinstance(formatted_params[param], dict):
             for key in formatted_params[param].keys():
                 PARAMS[key] = formatted_params[param][key]
@@ -69,7 +79,7 @@ def chrome_options():
         if PARAMS["headless"] == True:
             chrome_options.add_argument("--headless=new")
         chrome_options.add_argument("start-maximized")
-        chrome_options.add_argument("--user-data-dir=./User_Data")
+        chrome_options.add_argument(f"--user-data-dir=./user_data/{PARAMS['notifier']}_User_Data")
     chrome_options.binary_location = PARAMS["path_to_chrome"]
     chrome_options.executable_path= PARAMS["path_to_chromedriver"]
     return chrome_options
@@ -100,9 +110,10 @@ def get_filtered_sheet():
 
     data = sheet.get_all_values()
 
-    df = pd.DataFrame(data[1:], columns=data[0])
+    filtered_df = pd.DataFrame(data[1:], columns=data[0])
 
-    filtered_df = df[df[PARAMS["columns"]["notifier"]] == PARAMS["notifier"]]
+    if PARAMS["check_notifier_column"] == True:
+        filtered_df = filtered_df[filtered_df[PARAMS["columns"]["notifier"]] == PARAMS["notifier"]]
     
     filtered_df = filtered_df[filtered_df[PARAMS["columns"]["first_year"]]=="Yes"]
 
@@ -115,6 +126,15 @@ def get_filtered_sheet():
         filtered_df = filtered_df[filtered_df["Notified_"+PARAMS["target_subsystem"]].apply(validate_notification_field)]
 
     filtered_df['id'] = filtered_df.index + 2
+
+    t1 = datetime.datetime.strptime(PARAMS["start_time"], "%H:%M")
+    t2 = datetime.datetime.strptime(PARAMS["end_time"], "%H:%M")
+    diff = t2 - t1
+    minutes = diff.total_seconds() / 60
+    available_time = abs(int(minutes))
+
+    interview_count = (available_time//PARAMS["duration"])*PARAMS["at_once"]
+    filtered_df = filtered_df.head(interview_count)
 
     return filtered_df
 
@@ -201,7 +221,7 @@ def synthesise_message(template_message, index_pairs, name, subsystem, date, int
     return message
 
 
-def send_message(name, phone_number, message, backup_phone_number = None):
+def send_message(name, phone_number, message, phone_number_backup = None):
     phone_number = str(phone_number)
     if len(phone_number)==10:
         phone_number = "+91" + phone_number
@@ -216,10 +236,11 @@ def send_message(name, phone_number, message, backup_phone_number = None):
                 timeout_tries += 1
                 print(f"Attempt {timeout_tries}: Message timed out")
                 if timeout_tries == PARAMS["max_timeout_tries"]:
-                    if backup_phone_number:
-                        return send_message(name, backup_phone_number,message)
+                    if phone_number_backup:
+                        return send_message(name, phone_number_backup,message)
                     else:
                         return False
+                time.sleep(PARAMS["timeout_attempt_interval"])
             else:
                 return True
         except Exception as e:
@@ -230,11 +251,11 @@ def send_message(name, phone_number, message, backup_phone_number = None):
             print(traceback.format_exc())
 
 
-def calculate_time(i, start_time, end_time, duration, padding_minutes):
+def calculate_time(i, start_time, end_time, duration):
     start = datetime.datetime.strptime(start_time, "%H:%M")
     end = datetime.datetime.strptime(end_time, "%H:%M")
     total_available_minutes = (end - start).total_seconds() / 60
-    time_per_interview = duration + padding_minutes
+    time_per_interview = duration
     if i * time_per_interview + duration > total_available_minutes:
         return False
     interview_start_time = start + datetime.timedelta(minutes=i * time_per_interview)
@@ -263,9 +284,11 @@ def format_phone_number(phone_number, phone_number_backup = None):
 
 
 details = get_filtered_sheet()
+interview_count = len(details)
 
 print("First 5 rows of sheet:")
 print(details.head())
+print("Interview count:", interview_count)
 
 permission_to_continue()
 
@@ -276,7 +299,7 @@ with open("message.txt") as f:
 index_pairs = parse_template_message(template_message)
 
 print("Example message:")
-print(synthesise_message(template_message, index_pairs, "Abc Dfg", PARAMS["target_subsystem"], PARAMS["date"], PARAMS["start_time"]))
+print(synthesise_message(template_message, index_pairs, "<name>", PARAMS["target_subsystem"], PARAMS["date"], PARAMS["start_time"]))
 
 permission_to_continue()
 
@@ -297,16 +320,18 @@ i = 0
 batch_count = 0
 selected_indexes = list()
 selected_indexes_values = list()
+phone_number = PARAMS['testing']['recipient_phone_number']
 for index, row in details.iterrows():
     # print(row)
     name = row[PARAMS['columns']['name']]
-    backup_phone_number = format_phone_number(row[PARAMS["columns"]["mobile_number"]])
-    phone_number = format_phone_number(row[PARAMS['columns']['whatsapp_number']], phone_number_backup=row[PARAMS['columns']['mobile_number']])
+    phone_number_backup = format_phone_number(row[PARAMS["columns"]["mobile_number"]])
+    if PARAMS["testing"]["test_mode"] != True:
+        phone_number = format_phone_number(row[PARAMS['columns']['whatsapp_number']], phone_number_backup=row[PARAMS['columns']['mobile_number']])
     preference_columns = [PARAMS["columns"]["preference1"], PARAMS["columns"]["preference2"]]
     subsystem = row[preference_columns[PARAMS["subsystem_preference"]-1]]
     
     if i%PARAMS["at_once"] == 0:
-       interview_time = calculate_time(batch_count, PARAMS["start_time"], PARAMS["end_time"], PARAMS["duration"], PARAMS["padding_minutes"])
+       interview_time = calculate_time(batch_count, PARAMS["start_time"], PARAMS["end_time"], PARAMS["duration"])
        batch_count += 1
 
     if interview_time == False:
@@ -316,13 +341,14 @@ for index, row in details.iterrows():
     
     print(f"Attempting to schedule: Interview {i+1}/{len(details)} (Row {index+1}) @ {interview_time} for {subsystem} [{name}({phone_number})]")
     message = synthesise_message(template_message, index_pairs, name, subsystem, PARAMS["date"], interview_time)
-    message_status = send_message(name, phone_number, message, backup_phone_number=backup_phone_number)
+    message_status = send_message(name, phone_number, message, phone_number_backup=phone_number_backup)
     selected_indexes.append(row["id"])
     if message_status == True:
         i+=1
         print(f"Scheduled.")
         selected_indexes_values.append(f"Notified: {PARAMS['date']} {interview_time}")
     else:
+        interview_count -= 1
         print(f"Sending the message timed out. The whatsapp number may be invalid.")
         selected_indexes_values.append("Message timed out")
     
@@ -332,4 +358,5 @@ for index, row in details.iterrows():
     time.sleep(message_interval)
     print()
 
-update_sheet_values(PARAMS["target_sheet_url"], PARAMS["target_worksheet_name"], "Notified_"+PARAMS["target_subsystem"], selected_indexes, selected_indexes_values)
+if PARAMS['testing']['test_mode'] == True:
+    update_sheet_values(PARAMS["target_sheet_url"], PARAMS["target_worksheet_name"], "Notified_"+PARAMS["target_subsystem"], selected_indexes, selected_indexes_values)

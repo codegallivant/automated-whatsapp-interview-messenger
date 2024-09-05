@@ -1,14 +1,22 @@
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import yaml
+import os
 
+with open("settings_path.txt") as f:
+    settings_path = f.read()
 
-with open("settings.yaml") as stream:
-    try:
-        formatted_params = yaml.safe_load(stream)
-        print()
-    except yaml.YAMLError as exc:
-        print(exc)
+print("Settings path:",settings_path)
+
+if os.path.exists(settings_path):
+    # Load settings from YAML file
+    with open(settings_path) as stream:
+        try:
+            formatted_params = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+else:
+    print(f"{settings_path} not found")
 
 source_sheet_url = formatted_params["sheet_settings"]["source_sheet_url"]
 target_sheet_url = formatted_params["sheet_settings"]["target_sheet_url"]

@@ -28,7 +28,11 @@ message_settings:
   message_interval: 10
   timeout: 30
   max_timeout_tries: 3
-  notifier: "<your name>"
+  timeout_attempt_interval: 5
+  
+notifier_settings:
+  notifier: "<your-name>"
+  check_notifier_column: false
 
 columns:
   name: "Full Name"
@@ -43,3 +47,7 @@ columns:
   description: "Tell us about yourself."
   first_year: "This form is only for First Year Students. Are you in First Year?"
   notifier: "MemberNotifier"
+
+testing:
+  test_mode: true
+  recipient_phone_number: "<phone number>"

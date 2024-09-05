@@ -3,13 +3,24 @@ import gspread
 import pandas as pd
 from oauth2client.service_account import ServiceAccountCredentials
 import re
+import os
 
-# Load settings from YAML file
-with open("settings.yaml") as stream:
-    try:
-        PARAMS = yaml.safe_load(stream)
-    except yaml.YAMLError as exc:
-        print(exc)
+with open("settings_path.txt") as f:
+    settings_path = f.read()
+
+print("Settings path:",settings_path)
+
+if os.path.exists(settings_path):
+    # Load settings from YAML file
+    with open(settings_path) as stream:
+        try:
+            formatted_params = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+else:
+    print(f"{settings_path} not found")
+
+print(formatted_params)
 
 # Function to authenticate Google Sheets client
 def authenticate_client():
@@ -44,7 +55,7 @@ def get_filtered_sheet(sheet_url, worksheet_name, target_subsystem):
     data = sheet.get_all_values()
     df = pd.DataFrame(data[1:], columns=data[0])
 
-    preference_columns = [PARAMS["columns"]["preference1"], PARAMS["columns"]["preference2"]]
+    preference_columns = [formatted_params["columns"]["preference1"], formatted_params["columns"]["preference2"]]
     if target_subsystem not in [None, ""]:
         filtered_df = df[df[preference_columns[0]].apply(validate_subsystem_field) | 
                          df[preference_columns[1]].apply(validate_subsystem_field)]    
@@ -128,9 +139,9 @@ def append_df_to_sheet(df, sheet_url, worksheet_name):
     return sheet_url
 
 # Define the columns to be used
-columns = PARAMS['columns']
-column_aliases = PARAMS['columns'].keys()
-columns = [PARAMS['columns'][alias] for alias in column_aliases if alias not in ['first_year', 'notifier']]
+columns = formatted_params['columns']
+column_aliases = formatted_params['columns'].keys()
+columns = [formatted_params['columns'][alias] for alias in column_aliases if alias not in ['first_year', 'notifier']]
 tempcolumns = ['id', 'Interview Date', 'Interview Time', 'Interview Datetime']
 for column in columns:
     tempcolumns.append(column)
@@ -146,13 +157,13 @@ management_columns = ["Communication (3)", "Aptitude(2)", "Creativity(3)" ,"Grap
 subsystems = {
     "Artificial Intelligence": technical_columns,
     "Sensing And Automation": sna_columns,
-    # "Management": management_columns,
-    # "Mechanical": technical_columns
+    "Management": management_columns,
+    "Mechanical": technical_columns
 }
 
 for subsystem in subsystems.keys():
     # Get filtered data from the target sheet and worksheet
-    df = get_filtered_sheet(PARAMS['sheet_settings']['target_sheet_url'], PARAMS['sheet_settings']['target_worksheet_name'], subsystem)[columns]
+    df = get_filtered_sheet(formatted_params['sheet_settings']['target_sheet_url'], formatted_params['sheet_settings']['target_worksheet_name'], subsystem)[columns]
 
     # Add additional columns with empty values
     new_columns = subsystems[subsystem]
@@ -160,4 +171,4 @@ for subsystem in subsystems.keys():
         df[column] = len(df) * ['']
 
     # Append the DataFrame to the target worksheet
-    append_df_to_sheet(df, PARAMS['sheet_settings']['interview_score_url'], subsystem)
+    append_df_to_sheet(df, formatted_params['sheet_settings']['interview_score_url'], subsystem)
