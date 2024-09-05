@@ -70,7 +70,6 @@ interview_time_settings:
   date: "27/08/2024" # Date(DD/MM/YYYY) of interviews to be scheduled.
   start_time: "10:00" # Time(hh:mm 24hr) the first interview should start at
   end_time: "21:00" # Maximum time(hh:mm 24hr) by which the last interview should end
-  padding_minutes: 15 # Number of minutes to wait between each interview
   duration: 25 # Duration in minutes of each interview
   at_once: 6 # Number of interviews to schedule for the same time 
 
