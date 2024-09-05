@@ -16,8 +16,7 @@ interview_time_settings:
   date: "03/09/2024"
   start_time: "18:00"
   end_time: "21:00"
-  padding_minutes: 10
-  duration: 30
+  duration: 40
   at_once: 2
 
 subsystem_settings:
