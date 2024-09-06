@@ -176,9 +176,11 @@ def append_row_to_sheet(interview_worksheet, source_row_index, interview_time):
     else:
         print("No new rows to add.")
 
-def update_sheet_values(sheet_url, worksheet_name, update_column, row_indexes, update_values):
-    sheet = authenticate_sheet(sheet_url, worksheet_name)
 
+target_sheet = authenticate_sheet(PARAMS['target_sheet_url'], PARAMS['target_worksheet_name'])
+
+def update_sheet_values(update_column, row_indexes, update_values):
+    sheet = target_sheet
     headers = sheet.row_values(1)
     if update_column not in headers:
         new_col_index = len(headers) + 1
@@ -396,7 +398,7 @@ for index, row in new_rows.iterrows():
         print(f"Sending the message timed out. The whatsapp number may be invalid.")
         selected_indexes_value = "Message timed out"
     if not PARAMS['testing']['test_mode'] or (PARAMS['testing']['test_mode'] == True and PARAMS['testing']['update_target_sheet'] == True):
-        update_sheet_values(PARAMS["target_sheet_url"], PARAMS["target_worksheet_name"], "Notified_"+PARAMS["target_subsystem"], selected_index, selected_indexes_value)
+        update_sheet_values("Notified_"+PARAMS["target_subsystem"], [selected_index], [selected_indexes_value])
     message_interval = PARAMS["message_interval"]
     if i <= 1 and message_interval < 15:
         message_interval += 10
