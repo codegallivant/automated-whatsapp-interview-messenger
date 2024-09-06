@@ -374,13 +374,17 @@ for index, row in details.iterrows():
     
     print(f"Attempting to schedule: Interview {i+1}/{len(details)} (Row {index+1}) @ {interview_time} for {subsystem} [{name}({phone_number})]")
     message = synthesise_message(template_message, index_pairs, name, subsystem, PARAMS["date"], interview_time)
-    message_status = send_message(name, phone_number, message, phone_number_backup=phone_number_backup)
+    if not PARAMS['testing']['test_mode'] or (PARAMS['testing']['test_mode'] == True and PARAMS['testing']['send_message'] == True):
+        message_status = send_message(name, phone_number, message, phone_number_backup=phone_number_backup)
+    else:
+        message_status = True
     selected_indexes.append(row["id"])
     if message_status == True:
         i+=1
         print(f"Scheduled.")
         selected_indexes_values.append(f"Notified: {PARAMS['date']} {interview_time}")
-        append_row_to_sheet(interview_sheet, row['id'], interview_time)
+        if not PARAMS['testing']['test_mode'] or (PARAMS['testing']['test_mode'] == True and PARAMS['testing']['update_score_sheet'] == True): 
+            append_row_to_sheet(interview_sheet, row['id'], interview_time)
     else:
         interview_count -= 1
         print(f"Sending the message timed out. The whatsapp number may be invalid.")
@@ -392,5 +396,5 @@ for index, row in details.iterrows():
     time.sleep(message_interval)
     print()
 
-if PARAMS['testing']['test_mode'] != True:
+if not PARAMS['testing']['test_mode'] or (PARAMS['testing']['test_mode'] == True and PARAMS['testing']['update_target_sheet'] == True):
     update_sheet_values(PARAMS["target_sheet_url"], PARAMS["target_worksheet_name"], "Notified_"+PARAMS["target_subsystem"], selected_indexes, selected_indexes_values)

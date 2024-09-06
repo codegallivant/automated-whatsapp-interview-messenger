@@ -104,6 +104,9 @@ columns:
 testing: # for testing without sending messages to others
   test_mode: false
   recipient_phone_number: "<phone number>"
+  send_message: true
+  update_score_sheet: true
+  update_target_sheet: true
 ```
 
 ### Run

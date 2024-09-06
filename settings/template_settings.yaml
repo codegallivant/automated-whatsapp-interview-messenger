@@ -50,3 +50,6 @@ columns:
 testing:
   test_mode: false
   recipient_phone_number: "<phone number>"
+  send_message: true
+  update_score_sheet: true
+  update_target_sheet: true
