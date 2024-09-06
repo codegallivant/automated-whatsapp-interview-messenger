@@ -3,6 +3,7 @@ real_responses/
 details.csv
 details2.csv
 backupinit.py
+construct_interview_score_sheet.py
 
 # Service Account Credentials
 credentials.json
