@@ -136,8 +136,42 @@ def get_filtered_sheet():
     interview_count = (available_time//PARAMS["duration"])*PARAMS["at_once"]
     filtered_df = filtered_df.head(interview_count)
 
+    notified_column = "Notified_" + PARAMS['target_subsystem']
+
     return filtered_df
 
+
+details = get_filtered_sheet()
+interview_sheet = authenticate_sheet(PARAMS["interview_score_url"], PARAMS["target_subsystem"])
+interview_sheet_data = interview_sheet.get_all_values()
+interview_sheet_data = pd.DataFrame(interview_sheet_data[1:], columns=interview_sheet_data[0])
+interview_sheet_data['id'] = pd.to_numeric(interview_sheet_data['id'], errors='coerce')
+details['id'] = pd.to_numeric(details['id'], errors='coerce')
+columns = formatted_params['columns']
+column_aliases = formatted_params['columns'].keys()
+columns = [formatted_params['columns'][alias] for alias in column_aliases if alias not in ['first_year', 'notifier']]
+tempcolumns = ['id', 'Interview Date', 'Interview Time']
+for column in tempcolumns:
+    if column not in details.keys():
+        details[column] = ['']*len(details)
+for column in columns:
+    tempcolumns.append(column)
+columns = tempcolumns
+details = details[columns]
+new_rows = details[~details['id'].isin(interview_sheet_data['id'])]
+
+
+def append_row_to_sheet(interview_worksheet, source_row_index, interview_time):
+    global new_rows
+    this_rows = new_rows[new_rows['id']==source_row_index]
+    this_rows.loc[:,'Interview Date'] = PARAMS['date']
+    this_rows.loc[:,'Interview Time'] = interview_time
+    if not this_rows.empty:
+        for _, row in this_rows.iterrows():
+            interview_worksheet.append_row(row.tolist(), value_input_option='RAW')  # Ensure 'id' is the first column
+        print(f"Appended {len(this_rows)} new rows of data.")
+    else:
+        print("No new rows to add.")
 
 def update_sheet_values(sheet_url, worksheet_name, update_column, row_indexes, update_values):
     sheet = authenticate_sheet(sheet_url, worksheet_name)
@@ -283,12 +317,11 @@ def format_phone_number(phone_number, phone_number_backup = None):
     return formatted_number
 
 
-details = get_filtered_sheet()
 interview_count = len(details)
 
 print("First 5 rows of sheet:")
 print(details.head())
-print("Interview count:", interview_count)
+print("Number of interviews to schedule:", interview_count)
 
 permission_to_continue()
 
@@ -347,6 +380,7 @@ for index, row in details.iterrows():
         i+=1
         print(f"Scheduled.")
         selected_indexes_values.append(f"Notified: {PARAMS['date']} {interview_time}")
+        append_row_to_sheet(interview_sheet, row['id'], interview_time)
     else:
         interview_count -= 1
         print(f"Sending the message timed out. The whatsapp number may be invalid.")
@@ -358,5 +392,5 @@ for index, row in details.iterrows():
     time.sleep(message_interval)
     print()
 
-if PARAMS['testing']['test_mode'] == True:
+if PARAMS['testing']['test_mode'] != True:
     update_sheet_values(PARAMS["target_sheet_url"], PARAMS["target_worksheet_name"], "Notified_"+PARAMS["target_subsystem"], selected_indexes, selected_indexes_values)
