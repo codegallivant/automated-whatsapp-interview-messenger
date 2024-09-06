@@ -178,10 +178,9 @@ def append_row_to_sheet(interview_worksheet, source_row_index, interview_time):
 
 
 target_sheet = authenticate_sheet(PARAMS['target_sheet_url'], PARAMS['target_worksheet_name'])
-
+headers = target_sheet.row_values(1)
 def update_sheet_values(update_column, row_indexes, update_values):
     sheet = target_sheet
-    headers = sheet.row_values(1)
     if update_column not in headers:
         new_col_index = len(headers) + 1
         sheet.update_cell(1, new_col_index, update_column)
@@ -189,14 +188,12 @@ def update_sheet_values(update_column, row_indexes, update_values):
         print(f"Added new column '{update_column}' at position {new_col_index}")
     else:
         update_col_index = headers.index(update_column) + 1
-
     updates = []
     for row_index, value in zip(row_indexes, update_values):
         updates.append({
             'range': f'{gspread.utils.rowcol_to_a1(row_index, update_col_index)}',
             'values': [[value]]
         })
-
     sheet.batch_update(updates)
     print(f"Updated {len(updates)} cells in column '{update_column}'")
 
