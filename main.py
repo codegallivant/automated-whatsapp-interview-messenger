@@ -119,7 +119,10 @@ def get_filtered_sheet():
 
     preference_columns = [PARAMS["columns"]["preference1"], PARAMS["columns"]["preference2"]]
     if PARAMS["target_subsystem"] not in [None, ""]:
-        filtered_df = filtered_df[filtered_df[preference_columns[PARAMS["subsystem_preference"]-1]].apply(validate_subsystem_field)]
+        if PARAMS['subsystem_preference'] in [None, "", 0]:
+            filtered_df = filtered_df[filtered_df[preference_columns[0]].apply(validate_subsystem_field) | filtered_df[preference_columns[1]].apply(validate_subsystem_field)]
+        else:
+            filtered_df = filtered_df[filtered_df[preference_columns[PARAMS["subsystem_preference"]-1]].apply(validate_subsystem_field)]
         # filtered_df = filtered_df[filtered_df[preference_columns[PARAMS["subsystem_preference"]-1]]==PARAMS["target_subsystem"]]
     
     if "Notified_"+PARAMS["target_subsystem"] in filtered_df.keys():
@@ -317,10 +320,10 @@ def format_phone_number(phone_number, phone_number_backup = None):
     return formatted_number
 
 
-interview_count = len(details)
+interview_count = len(new_rows)
 
 print("First 5 rows of sheet:")
-print(details.head())
+print(new_rows.head())
 print("Number of interviews to schedule:", interview_count)
 
 permission_to_continue()
@@ -345,8 +348,8 @@ for _, handle in enumerate(handles):
 
 messenger = WhatsApp(browser = browser)
 
-if "Notified_"+PARAMS["target_subsystem"] not in details.keys():
-    details["Notified_"+PARAMS["target_subsystem"]] = ['']*len(details)
+if "Notified_"+PARAMS["target_subsystem"] not in new_rows.keys():
+    new_rows["Notified_"+PARAMS["target_subsystem"]] = ['']*len(new_rows)
 
 # Send all messages
 i = 0
@@ -354,15 +357,18 @@ batch_count = 0
 selected_indexes = list()
 selected_indexes_values = list()
 phone_number = PARAMS['testing']['recipient_phone_number']
-for index, row in details.iterrows():
+preference_columns = [PARAMS["columns"]["preference1"], PARAMS["columns"]["preference2"]]
+for index, row in new_rows.iterrows():
     # print(row)
     name = row[PARAMS['columns']['name']]
     phone_number_backup = format_phone_number(row[PARAMS["columns"]["mobile_number"]])
     if PARAMS["testing"]["test_mode"] != True:
         phone_number = format_phone_number(row[PARAMS['columns']['whatsapp_number']], phone_number_backup=row[PARAMS['columns']['mobile_number']])
-    preference_columns = [PARAMS["columns"]["preference1"], PARAMS["columns"]["preference2"]]
-    subsystem = row[preference_columns[PARAMS["subsystem_preference"]-1]]
-    
+    if PARAMS["subsystem_preference"] in [None, "", 0]:
+        subsystem = PARAMS['target_subsystem']
+    else:
+        subsystem = row[preference_columns[PARAMS["subsystem_preference"]-1]]
+
     if i%PARAMS["at_once"] == 0:
        interview_time = calculate_time(batch_count, PARAMS["start_time"], PARAMS["end_time"], PARAMS["duration"])
        batch_count += 1
@@ -372,29 +378,27 @@ for index, row in details.iterrows():
         print(f"{i} interviews scheduled.")
         break
     
-    print(f"Attempting to schedule: Interview {i+1}/{len(details)} (Row {index+1}) @ {interview_time} for {subsystem} [{name}({phone_number})]")
+    print(f"Attempting to schedule: Interview {i+1}/{len(new_rows)} (Row {index+1}) @ {interview_time} for {subsystem} [{name}({phone_number})]")
     message = synthesise_message(template_message, index_pairs, name, subsystem, PARAMS["date"], interview_time)
     if not PARAMS['testing']['test_mode'] or (PARAMS['testing']['test_mode'] == True and PARAMS['testing']['send_message'] == True):
         message_status = send_message(name, phone_number, message, phone_number_backup=phone_number_backup)
     else:
         message_status = True
-    selected_indexes.append(row["id"])
+    selected_index = row["id"]
     if message_status == True:
         i+=1
         print(f"Scheduled.")
-        selected_indexes_values.append(f"Notified: {PARAMS['date']} {interview_time}")
+        selected_indexes_value = f"Notified: {PARAMS['date']} {interview_time}"
         if not PARAMS['testing']['test_mode'] or (PARAMS['testing']['test_mode'] == True and PARAMS['testing']['update_score_sheet'] == True): 
             append_row_to_sheet(interview_sheet, row['id'], interview_time)
     else:
         interview_count -= 1
         print(f"Sending the message timed out. The whatsapp number may be invalid.")
-        selected_indexes_values.append("Message timed out")
-    
+        selected_indexes_value = "Message timed out"
+    if not PARAMS['testing']['test_mode'] or (PARAMS['testing']['test_mode'] == True and PARAMS['testing']['update_target_sheet'] == True):
+        update_sheet_values(PARAMS["target_sheet_url"], PARAMS["target_worksheet_name"], "Notified_"+PARAMS["target_subsystem"], selected_index, selected_indexes_value)
     message_interval = PARAMS["message_interval"]
     if i <= 1 and message_interval < 15:
         message_interval += 10
     time.sleep(message_interval)
     print()
-
-if not PARAMS['testing']['test_mode'] or (PARAMS['testing']['test_mode'] == True and PARAMS['testing']['update_target_sheet'] == True):
-    update_sheet_values(PARAMS["target_sheet_url"], PARAMS["target_worksheet_name"], "Notified_"+PARAMS["target_subsystem"], selected_indexes, selected_indexes_values)
