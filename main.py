@@ -258,9 +258,16 @@ def synthesise_message(template_message, index_pairs, name, subsystem, date, int
 
 
 def send_message(name, phone_number, message, phone_number_backup = None):
+    
     phone_number = str(phone_number)
     if len(phone_number)==10:
         phone_number = "+91" + phone_number
+
+    if phone_number_backup != None:
+        phone_number_backup = str(phone_number_backup)
+        if len(phone_number_backup) == 10:
+            phone_number_backup = "+91" + phone_number_backup
+    
     i = 0
     timeout_tries = 0
     while True:
@@ -273,6 +280,7 @@ def send_message(name, phone_number, message, phone_number_backup = None):
                 print(f"Attempt {timeout_tries}: Message timed out")
                 if timeout_tries == PARAMS["max_timeout_tries"]:
                     if phone_number_backup:
+                        print(f"Attempting with backup phone number ({phone_number_backup})")
                         return send_message(name, phone_number_backup,message)
                     else:
                         return False
@@ -348,7 +356,7 @@ for _, handle in enumerate(handles):
 messenger = WhatsApp(browser = browser)
 
 if "Notified_"+PARAMS["target_subsystem"] not in new_rows.keys():
-    new_rows["Notified_"+PARAMS["target_subsystem"]] = ['']*len(new_rows)
+    new_rows.loc[:,"Notified_"+PARAMS["target_subsystem"]] = ['']*len(new_rows)
 
 # Send all messages
 i = 0
@@ -359,7 +367,7 @@ phone_number = PARAMS['testing']['recipient_phone_number']
 preference_columns = [PARAMS["columns"]["preference1"], PARAMS["columns"]["preference2"]]
 for index, row in new_rows.iterrows():
     # print(row)
-    name = row[PARAMS['columns']['name']]
+    name = row[PARAMS['columns']['name']].strip().title()
     phone_number_backup = format_phone_number(row[PARAMS["columns"]["mobile_number"]])
     if PARAMS["testing"]["test_mode"] != True:
         phone_number = format_phone_number(row[PARAMS['columns']['whatsapp_number']], phone_number_backup=row[PARAMS['columns']['mobile_number']])
@@ -377,7 +385,7 @@ for index, row in new_rows.iterrows():
         print(f"{i} interviews scheduled.")
         break
     
-    print(f"Attempting to schedule: Interview {i+1}/{len(new_rows)} (Row {index+1}) @ {interview_time} for {subsystem} [{name}({phone_number})]")
+    print(f"Attempting to schedule: Interview {i+1}/{len(new_rows)} (Row ID {row['id']}) @ {interview_time} for {subsystem} [{name}({phone_number})]")
     message = synthesise_message(template_message, index_pairs, name, subsystem, PARAMS["date"], interview_time)
     if not PARAMS['testing']['test_mode'] or (PARAMS['testing']['test_mode'] == True and PARAMS['testing']['send_message'] == True):
         message_status = send_message(name, phone_number, message, phone_number_backup=phone_number_backup)
