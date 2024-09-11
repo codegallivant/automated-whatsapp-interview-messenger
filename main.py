@@ -134,7 +134,7 @@ def get_filtered_sheet():
     t2 = datetime.datetime.strptime(PARAMS["end_time"], "%H:%M")
     diff = t2 - t1
     minutes = diff.total_seconds() / 60
-    available_time = abs(int(minutes))
+    available_time = abs(int(minutes)) + 60
 
     interview_count = (available_time//PARAMS["duration"])*PARAMS["at_once"]
     filtered_df = filtered_df.head(interview_count)
