@@ -346,6 +346,8 @@ print(synthesise_message(template_message, index_pairs, "<name>", PARAMS["target
 
 permission_to_continue()
 
+print("Opening WhatsApp..")
+
 browser = webdriver.Chrome(options=chrome_options())
 handles = browser.window_handles
 for _, handle in enumerate(handles):
@@ -354,6 +356,8 @@ for _, handle in enumerate(handles):
         browser.close()
 
 messenger = WhatsApp(browser = browser)
+
+permission_to_continue()
 
 if "Notified_"+PARAMS["target_subsystem"] not in new_rows.keys():
     new_rows.loc[:,"Notified_"+PARAMS["target_subsystem"]] = ['']*len(new_rows)
